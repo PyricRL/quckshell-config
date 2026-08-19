@@ -1,20 +1,22 @@
 import QtQuick
 import QtQuick.Layouts
 
+import "../config.js" as Theme
+
 Rectangle {
   id: root
 
-  radius: 4
+  radius: Theme.sizes.radiusSmall
 
-  implicitHeight: 24
-  implicitWidth: contentRow.implicitWidth
+  implicitHeight: Theme.bar.height
+  implicitWidth: contentRow.implicitWidth + 8
 
   border {
-    color: "#ff0000"
-    width: 1
+    color: Theme.colors.accent
+    width: Theme.sizes.borderWidth
   }
 
-  color: "#ffffff"
+  color: Theme.colors.background
 
   default property alias content: contentRow.data
 

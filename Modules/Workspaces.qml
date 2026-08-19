@@ -7,6 +7,9 @@ Item {
   implicitWidth: row.implicitWidth
   implicitHeight: row.implicitHeight
 
+  width: implicitWidth + 20
+  height: implicitHeight
+
   Row {
     id: row
     spacing: 4

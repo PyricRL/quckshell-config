@@ -7,12 +7,21 @@ Singleton {
   id: root
 
   property string currentActiveModule: ""
+  property string currentActiveTab: ""
 
   function setActiveModule(modulename) {
     if (modulename) {
       currentActiveModule = modulename;
     } else {
       currentActiveModule = "";
+    }
+  }
+
+  function setActiveTab(tabname) {
+    if (tabname) {
+      currentActiveTab = tabname;
+    } else {
+      currentActiveTab = "";
     }
   }
 

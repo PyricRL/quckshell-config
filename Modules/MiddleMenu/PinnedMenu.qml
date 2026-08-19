@@ -4,6 +4,8 @@ import Quickshell
 
 import qs.Services
 
+import "../../config.js" as Theme
+
 RowLayout {
   clip: true
   Image {
@@ -60,7 +62,7 @@ RowLayout {
       Rectangle {
         Layout.preferredWidth: 18
         Layout.preferredHeight: 18
-        radius: height / 2
+        radius: 4
         color: "#000000"
 
         Text {
@@ -85,13 +87,13 @@ RowLayout {
       Rectangle {
         Layout.preferredWidth: 18
         Layout.preferredHeight: 18
-        radius: height / 2
-        color: "#000000"
+        radius: 4
+        color: Theme.colors.text
 
         Text {
           anchors.centerIn: parent
           text: "󰼧"
-          color: "white"
+          color: Theme.colors.text
           font.pixelSize: 12
         }
 

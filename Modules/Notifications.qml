@@ -2,19 +2,18 @@ import Quickshell
 import QtQuick
 
 import qs.Items
+import qs.Items.Styled
 
-Text {
-  text: " "
+StyledButton {
+  text: ""
+  muted: false
+  small: true
 
-  MouseArea {
-    anchors.fill: parent
-    
-    onClicked: function () {
-      if (Visibilities.currentActiveModule === "notificationmenu") {
-        Visibilities.setActiveModule("");
-      } else {
-        Visibilities.setActiveModule("notificationmenu")
-      }
+  onClicked: function () {
+    if (Visibilities.currentActiveModule === "informationmenu") {
+      Visibilities.setActiveModule("");
+    } else {
+      Visibilities.setActiveModule("informationmenu")
     }
   }
 }

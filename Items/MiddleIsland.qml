@@ -5,6 +5,8 @@ import Quickshell.Wayland
 
 import "../Items/" as Items
 
+import "../config.js" as Theme
+
 PanelWindow {
     id: root
 
@@ -77,7 +79,7 @@ PanelWindow {
                 ? 4
                 : 4
 
-            color: "#ffffff"
+            color: Theme.color.background
 
             Behavior on width {
                 NumberAnimation {

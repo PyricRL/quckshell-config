@@ -2,19 +2,17 @@ import Quickshell
 import QtQuick
 
 import qs.Items
+import qs.Items.Styled
 
-Text {
-  // text: "⏻"
-  text: "⏻ :" + Visibilities.currentActiveModule
+StyledButton {
+  text: "⏻"
+  small: true
 
-  MouseArea {
-    anchors.fill: parent
-    onClicked: function () {
-      if (Visibilities.currentActiveModule === "powermenu") {
-        Visibilities.setActiveModule("");
-      } else {
-        Visibilities.setActiveModule("powermenu")
-      }
+  onClicked: function () {
+    if (Visibilities.currentActiveModule === "powermenu") {
+      Visibilities.setActiveModule("");
+    } else {
+      Visibilities.setActiveModule("powermenu")
     }
   }
 }

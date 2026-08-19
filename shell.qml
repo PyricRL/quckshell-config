@@ -4,6 +4,8 @@ import QtQuick
 import "Modules" as Modules
 import "Widgets" as Widgets
 
+import "Widgets/InformationMenu" as InformationMenu
+
 import "Modules/Notifications" as Notifications
 
 import "Services" as Services
@@ -16,6 +18,8 @@ Scope {
   Widgets.PowerMenu {}
 
   Widgets.NotificationMenu {}
+
+  InformationMenu.InformationMenu {}
 
   Notifications.NotificationPopup {}
 

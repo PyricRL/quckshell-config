@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
+import "../config.js" as Theme
+
 PanelWindow {
   id: root
 
@@ -77,7 +79,12 @@ PanelWindow {
 
       clip: true
 
-      radius: 4
+      radius: Theme.sizes.radiusSmall
+
+      border.color: Theme.colors.accent
+      border.width: Theme.sizes.borderWidth
+
+      color: Theme.colors.background
 
       Behavior on implicitWidth {
         NumberAnimation {
