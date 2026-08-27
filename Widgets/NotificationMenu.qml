@@ -7,6 +7,7 @@ import qs.Items
 import qs.Services
 import qs.Modules.Notifications
 
+
 PanelWindow {
   id: root
 
