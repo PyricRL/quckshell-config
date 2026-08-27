@@ -7,128 +7,138 @@ import qs.Items
 import qs.Items.Styled
 
 ColumnLayout {
-    id: root
+  id: root
 
-    StyledDropdown {
-      id: dropdown
+  FrameAnimation {
+    id: positionMonitor
+
+    running: {
+      const player = MediaService.viewedPlayer
+
+      return player && player.playbackState === 1
+    }
+
+    onTriggered: {
+      const player = MediaService.viewedPlayer
+
+      if (player)
+        player.positionChanged()
+    }
+  }
+
+  StyledDropdown {
+    id: dropdown
+    Layout.alignment: Qt.AlignHCenter
+    z: 1
+    model: MediaService.players
+    textRole: "identity"
+    placeholderText: "Select Player"
+
+    currentIndex: {
+      if (!MediaService.viewedPlayer || !MediaService.players) {
+        return -1
+      }
+      
+      return MediaService.players.indexOf(MediaService.viewedPlayer)
+    }
+
+    onSelected: function(item, index) {
+      MediaService.viewedPlayer = item
+    }
+  }
+  ColumnLayout {
+    Layout.alignment: Qt.AlignHCenter
+    Image {
       Layout.alignment: Qt.AlignHCenter
-      z: 1
-      model: MediaService.players
-      textRole: "identity"
-      placeholderText: "Select Player"
+      Layout.preferredWidth: 150
+      Layout.preferredHeight: 150
+      
+      source: MediaService.viewedPlayer
+        ? MediaService.viewedPlayer.trackArtUrl
+        : ""
 
-      currentIndex: {
-        if (!MediaService.viewedPlayer || !MediaService.players) {
-          return -1
-        }
-        
-        return MediaService.players.indexOf(MediaService.viewedPlayer)
+      fillMode: Image.PreserveAspectCrop
+
+      smooth: true
+      mipmap: true
+    }
+    StyledText {
+      small: true
+        Layout.alignment: Qt.AlignHCenter
+        text: MediaService.viewedPlayer
+          ? MediaService.viewedPlayer.trackTitle
+          : "Unable to find Title"
+    }
+    StyledText {
+      small: true
+        Layout.alignment: Qt.AlignHCenter
+        text: MediaService.viewedPlayer
+          ? MediaService.viewedPlayer.trackArtist
+          : "Unable to find Artist"
+    }
+    StyledSlider {
+      id: positionSlider
+
+      Layout.alignment: Qt.AlignHCenter
+      Layout.preferredWidth: 220
+
+      from: 0
+
+      to: MediaService.viewedPlayer
+        ? MediaService.viewedPlayer.length
+        : 1
+
+      Binding {
+        target: positionSlider
+        property: "value"
+
+        value: MediaService.viewedPlayer
+          ? MediaService.viewedPlayer.position
+          : 0
+
+        when: !positionSlider.pressed
       }
 
-      onSelected: function(item, index) {
-        MediaService.viewedPlayer = item
+      onInteraction: function(newPosition) {
+        if (MediaService.viewedPlayer)
+          MediaService.viewedPlayer.position = newPosition
       }
     }
-
-    ColumnLayout {
-        Layout.alignment: Qt.AlignHCenter
-        Image {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: 150
-            Layout.preferredHeight: 150
-            
-            source: MediaService.viewedPlayer
-                ? MediaService.viewedPlayer.trackArtUrl
-                : ""
-
-            fillMode: Image.PreserveAspectCrop
-
-            smooth: true
-            mipmap: true
+  }
+  RowLayout {
+    Layout.alignment: Qt.AlignHCenter
+    StyledButton {
+      implicitWidth: 40
+      implicitHeight: 20
+      text: "back"
+      small: true
+      onClicked: {
+        if (MediaService.viewedPlayer) {
+          MediaService.viewedPlayer.previous()
         }
-        Text {
-            Layout.alignment: Qt.AlignHCenter
-            text: MediaService.viewedPlayer
-                ? MediaService.viewedPlayer.trackTitle
-                : "Unable to find Title"
-        }
-        Text {
-            Layout.alignment: Qt.AlignHCenter
-            text: MediaService.viewedPlayer
-                ? MediaService.viewedPlayer.trackArtist
-                : "Unable to find Artist"
-        }
-        Slider {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: 220
-
-            minimum: 0
-
-            maximum: MediaService.viewedPlayer
-                ? MediaService.viewedPlayer.length
-                : 1
-
-            value: MediaService.viewedPlayer
-                ? MediaService.viewedPlayer.position
-                : 0
-            
-            onMoved: function(value) {
-                if (MediaService.viewedPlayer)
-                    MediaService.viewedPlayer.position = value
-            }
-        }
+      }
     }
-
-    RowLayout {
-        Layout.alignment: Qt.AlignHCenter
-        Rectangle {
-            implicitWidth: 40
-            implicitHeight: 20
-            color: "#ff0000"
-            Text {
-                text: "back"
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (MediaService.viewedPlayer) {
-                        MediaService.viewedPlayer.previous()
-                    }
-                }
-            }
+    StyledButton {
+      implicitWidth: 40
+      implicitHeight: 20
+      text: "pause"
+      small: true
+      onClicked: {
+        if (MediaService.viewedPlayer) {
+          MediaService.viewedPlayer.togglePlaying()
         }
-        Rectangle {
-            implicitWidth: 40
-            implicitHeight: 20
-            color: "#ff0000"
-            Text {
-                text: "pause"
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (MediaService.viewedPlayer) {
-                        MediaService.viewedPlayer.togglePlaying()
-                    }
-                }
-            }
-        }
-        Rectangle {
-            implicitWidth: 40
-            implicitHeight: 20
-            color: "#ff0000"
-            Text {
-                text: "skip"
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (MediaService.viewedPlayer) {
-                        MediaService.viewedPlayer.next()
-                    }
-                }
-            }
-        }
+      }
     }
+    StyledButton {
+      implicitWidth: 40
+      implicitHeight: 20
+      text: "skip"
+      small: true
+      onClicked: {
+        if (MediaService.viewedPlayer) {
+          MediaService.viewedPlayer.next()
+        }
+      }
+    }
+  }
 }
-

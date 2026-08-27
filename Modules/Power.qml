@@ -8,6 +8,9 @@ StyledButton {
   text: "⏻"
   small: true
 
+  accentBg: false
+  accentText: true
+
   onClicked: function () {
     if (Visibilities.currentActiveModule === "powermenu") {
       Visibilities.setActiveModule("");

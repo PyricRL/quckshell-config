@@ -6,8 +6,10 @@ import qs.Items.Styled
 
 StyledButton {
   text: ""
-  muted: false
   small: true
+
+  accentBg: false
+  accentText: true
 
   onClicked: function () {
     if (Visibilities.currentActiveModule === "informationmenu") {

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import qs.Services
+import qs.Items.Styled
 
 Item {
   implicitWidth: row.implicitWidth
@@ -17,14 +18,13 @@ Item {
     Repeater {
       model: NiriService.workspaces
 
-      Rectangle {
+      StyledButton {
         visible: (index < 11) && (!model.output || model.output === "DP-3")
 
         implicitWidth: 16
         implicitHeight: 16
 
         radius: width / 2
-        color: "#000000"
       }
     }
   }

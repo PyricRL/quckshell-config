@@ -2,7 +2,8 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-import "../Items/" as Items
+import qs.Items
+import qs.Items.Styled
 
 PanelWindow {
   id: root
@@ -21,10 +22,11 @@ PanelWindow {
     anchors.fill: parent
 
     RowLayout {
-      Items.Pill {
+      Pill {
         Power {}
-        Text {
+        StyledText {
           text: "|"
+          small: true
         }
         Workspaces {}
       }
@@ -39,10 +41,11 @@ PanelWindow {
       Layout.fillWidth: true
     }
     RowLayout {
-      Items.Pill {
+      Pill {
         Time {}
-        Text {
+        StyledText {
           text: "|"
+          small: true
         }
         Notifications {}
       }

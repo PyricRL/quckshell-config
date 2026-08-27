@@ -1,7 +1,10 @@
 import QtQuick
+import qs.Items.Styled
 
-Text {
+StyledText {
     id: clock
+
+    small: true
 
     text: Qt.formatDateTime(new Date(), "h:mm AP")
 

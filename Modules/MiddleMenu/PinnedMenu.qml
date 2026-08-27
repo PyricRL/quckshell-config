@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 
 import qs.Services
+import qs.Items.Styled
 
 import "../../config.js" as Theme
 
@@ -26,9 +27,10 @@ RowLayout {
 
   ColumnLayout {
     Layout.fillWidth: true
-    Text {
+    StyledText {
       Layout.alignment: Qt.AlignLeft
       Layout.fillWidth: true
+      small: true
       text: MediaService.activePlayer ? MediaService.activePlayer.trackTitle + " · " + MediaService.activePlayer.trackArtist : "No Media Playing"
       elide: Text.ElideRight
     }
@@ -36,74 +38,51 @@ RowLayout {
     // button layout
     RowLayout {
       Layout.alignment: Qt.AlignHCenter
-      Rectangle {
-        Layout.preferredWidth: 18
-        Layout.preferredHeight: 18
-        radius: height / 2
-        color: "#000000"
+      spacing: Theme.sizes.spacingLarge
 
-        Text {
-          anchors.centerIn: parent
-          text: "󰼨"
-          color: "white"
-          font.pixelSize: 12
-        }
-        
-        MouseArea {
-          anchors.fill: parent
+      StyledButton {
+        small: true
+        text: "󰼨"
+        disabled: !MediaService.viewedPlayer
 
-          onClicked: {
-            if (MediaService.viewedPlayer) {
-              MediaService.viewedPlayer.previous()
-            }
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 24
+
+        onClicked: {
+          if (MediaService.viewedPlayer) {
+            MediaService.viewedPlayer.previous()
           }
         }
       }
-      Rectangle {
-        Layout.preferredWidth: 18
-        Layout.preferredHeight: 18
-        radius: 4
-        color: "#000000"
 
-        Text {
-          anchors.centerIn: parent
-          text: MediaService.viewedPlayer && MediaService.viewedPlayer.isPlaying
-            ? ""
-            : ""
-          color: "white"
-          font.pixelSize: 12
-        }
+      StyledButton {
+        small: true
+        text: MediaService.viewedPlayer && MediaService.viewedPlayer.isPlaying
+          ? ""
+          : ""
+        disabled: !MediaService.viewedPlayer
 
-        MouseArea {
-          anchors.fill: parent
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 24
 
-          onClicked: {
-            if (MediaService.viewedPlayer) {
-              MediaService.viewedPlayer.togglePlaying()
-            }
+        onClicked: {
+          if (MediaService.viewedPlayer) {
+            MediaService.viewedPlayer.togglePlaying()
           }
         }
       }
-      Rectangle {
-        Layout.preferredWidth: 18
-        Layout.preferredHeight: 18
-        radius: 4
-        color: Theme.colors.text
 
-        Text {
-          anchors.centerIn: parent
-          text: "󰼧"
-          color: Theme.colors.text
-          font.pixelSize: 12
-        }
+      StyledButton {
+        small: true
+        text: "󰼧"
+        disabled: !MediaService.viewedPlayer
 
-        MouseArea {
-          anchors.fill: parent
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 24
 
-          onClicked: {
-            if (MediaService.viewedPlayer) {
-              MediaService.viewedPlayer.next()
-            }
+        onClicked: {
+          if (MediaService.viewedPlayer) {
+            MediaService.viewedPlayer.next()
           }
         }
       }
