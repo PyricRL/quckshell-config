@@ -6,6 +6,8 @@ import QtQuick.Layouts
 import qs.Services
 import qs.Items
 
+import qs.Items.Styled
+
 PanelWindow {
     anchors {
         top: true
@@ -32,7 +34,6 @@ PanelWindow {
         id: column
 
         width: parent.width
-        spacing: 10
 
         Repeater {
             model: NotificationService.server.trackedNotifications

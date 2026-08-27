@@ -2,6 +2,9 @@ import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
 
+import "../../config.js" as Theme
+import qs.Items.Styled
+
 Rectangle {
     id: card
 
@@ -17,14 +20,14 @@ Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: layout.implicitHeight + 20
 
-    radius: 4
+    radius: Theme.sizes.radiusSmall
 
-    color: "#ffffff"
+    color: Theme.colors.background
 
-    border.width: 2
+    border.width: 2 + Theme.sizes.borderWidth
     border.color: notification.urgency === NotificationUrgency.Critical
-        ? "#ff0000"
-        : "#00ff00"
+        ? Theme.colors.urgent
+        : Theme.colors.border
 
     RowLayout {
         id: layout
@@ -51,7 +54,7 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 2
 
-            Text {
+            StyledText {
                 Layout.fillWidth: true
 
                 text: notification.summary
@@ -62,7 +65,7 @@ Rectangle {
                 elide: Text.ElideRight
             }
 
-            Text {
+            StyledText {
                 Layout.fillWidth: true
 
                 visible: text !== ""

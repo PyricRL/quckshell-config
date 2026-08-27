@@ -15,7 +15,9 @@ Item {
 
     anchors.fill: parent
     verticalAlignment: Text.AlignVCenter
-    horizontalAlignment: Text.AlignHLeft
+    horizontalAlignment: text.length <= 25
+      ? Text.AlignHCenter
+      : Text.AlignHLeft
 
     small: true
     elide: Text.ElideRight
