@@ -3,13 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Templates as T
 
+import "../../config.js" as Theme
+
 T.Slider {
   id: root
-
-  property color foregroundColor: "#999999"
-  property color backgroundColor: "#444444"
-  property real barHeight: 6
-  property real handleWidth: 10
 
   signal interaction(real value)
 
@@ -22,30 +19,48 @@ T.Slider {
 
   background: Rectangle {
     x: 0
-    y: (root.height - root.barHeight) / 2
+    y: (root.height - height) / 2
     width: root.width
-    height: root.barHeight
-    radius: height / 2
-    color: root.backgroundColor
+    height: Theme.sizes.sliderHeight
+    radius: Theme.sizes.radiusSmall
+
+    color: !root.enabled
+      ? Theme.colors.surfaceDisabled
+      : Theme.colors.surfaceInteractive
   }
 
   contentItem: Rectangle {
     x: 0
-    y: (root.height - root.barHeight) / 2
+    y: (root.height - height) / 2
     width: root.visualPosition * root.width
-    height: root.barHeight
-    radius: height / 2
-    color: root.foregroundColor
+    height: Theme.sizes.sliderHeight
+    radius: Theme.sizes.radiusSmall
+
+    color: {
+      if (!root.enabled) return Theme.colors.contentDisabled
+      if (root.pressed) return Theme.colors.accentHover
+      if (root.hovered) return Theme.colors.accentHover
+      return Theme.colors.accent
+    }
   }
 
   handle: Rectangle {
     x: root.visualPosition * (root.width - width)
     y: (root.height - height) / 2
 
-    width: root.handleWidth
-    height: root.height
-    radius: width / 2
-    color: root.foregroundColor
+    width: Theme.sizes.sliderHandle / 2
+    height: Theme.sizes.sliderHandle
+    radius: Theme.sizes.radiusSmall
+
+    color: {
+      if (!root.enabled) return Theme.colors.contentDisabled
+      if (root.pressed) return Theme.colors.contentActive
+      if (root.hovered) return Theme.colors.contentHover
+      return Theme.colors.contentInteractive
+    }
+
+    border.color: root.pressed ? Theme.colors.borderActive : Theme.colors.border
+    border.width: root.hovered ? Theme.sizes.borderWidthActive : Theme.sizes.borderWidth
   }
 
   onMoved: {
@@ -55,7 +70,8 @@ T.Slider {
   }
 
   onPressedChanged: {
-    if (!pressed)
+    if (!pressed) {
       root.interaction(root.value)
+    }
   }
 }

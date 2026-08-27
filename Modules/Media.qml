@@ -2,6 +2,8 @@ import qs.Items
 
 import "MiddleMenu/" as Menu
 
+import "../config.js" as Theme
+
 MiddleMenu {
   Menu.ClosedMenu {
     anchors.fill: parent
@@ -14,6 +16,7 @@ MiddleMenu {
   }
 
   Menu.PinnedMenu {
+    anchors.margins: Theme.sizes.spacingLarge
     anchors.fill: parent
     visible: Visibilities.middleMenuState === "pin"
   }

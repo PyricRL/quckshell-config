@@ -1,35 +1,37 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 
 import qs.Services
 import qs.Items
 import qs.Items.Styled
 
+import "../../config.js" as Theme
+
 ColumnLayout {
   id: root
+
+  spacing: Theme.sizes.spacingLarge
 
   FrameAnimation {
     id: positionMonitor
 
     running: {
       const player = MediaService.viewedPlayer
-
       return player && player.playbackState === 1
     }
 
     onTriggered: {
       const player = MediaService.viewedPlayer
-
-      if (player)
-        player.positionChanged()
+      if (player) player.positionChanged()
     }
   }
 
   StyledDropdown {
     id: dropdown
     Layout.alignment: Qt.AlignHCenter
-    z: 1
+    z: 100
     model: MediaService.players
     textRole: "identity"
     placeholderText: "Select Player"
@@ -38,7 +40,6 @@ ColumnLayout {
       if (!MediaService.viewedPlayer || !MediaService.players) {
         return -1
       }
-      
       return MediaService.players.indexOf(MediaService.viewedPlayer)
     }
 
@@ -46,94 +47,126 @@ ColumnLayout {
       MediaService.viewedPlayer = item
     }
   }
+
   ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
-    Image {
+    spacing: Theme.sizes.spacingSmall
+
+    ClippingRectangle {
+      visible: MediaService.viewedPlayer !== null
       Layout.alignment: Qt.AlignHCenter
       Layout.preferredWidth: 150
       Layout.preferredHeight: 150
       
-      source: MediaService.viewedPlayer
-        ? MediaService.viewedPlayer.trackArtUrl
+      radius: Theme.sizes.radiusLarge
+      clip: true
+      color: Theme.colors.surfaceInteractive
+
+      Image {
+        anchors.fill: parent
+        source: MediaService.viewedPlayer
+          ? MediaService.viewedPlayer.trackArtUrl
+          : ""
+
+        fillMode: Image.PreserveAspectCrop
+        smooth: true
+        mipmap: true
+      }
+    }
+
+    StyledText {
+      small: true
+      Layout.alignment: Qt.AlignHCenter
+      Layout.maximumWidth: 220
+      elide: Text.ElideRight
+      
+      text: MediaService.viewedPlayer
+        ? MediaService.viewedPlayer.trackTitle
+        : "No Media Selected"
+
+      color: MediaService.viewedPlayer 
+        ? Theme.colors.contentInteractive 
+        : Theme.colors.contentDisabled
+    }
+
+    StyledText {
+      small: true
+      Layout.alignment: Qt.AlignHCenter
+      Layout.maximumWidth: 220
+      elide: Text.ElideRight
+      
+      text: MediaService.viewedPlayer
+        ? MediaService.viewedPlayer.trackArtist
         : ""
 
-      fillMode: Image.PreserveAspectCrop
+      color: Theme.colors.textMuted
+    }
 
-      smooth: true
-      mipmap: true
-    }
-    StyledText {
-      small: true
-        Layout.alignment: Qt.AlignHCenter
-        text: MediaService.viewedPlayer
-          ? MediaService.viewedPlayer.trackTitle
-          : "Unable to find Title"
-    }
-    StyledText {
-      small: true
-        Layout.alignment: Qt.AlignHCenter
-        text: MediaService.viewedPlayer
-          ? MediaService.viewedPlayer.trackArtist
-          : "Unable to find Artist"
-    }
     StyledSlider {
       id: positionSlider
 
       Layout.alignment: Qt.AlignHCenter
       Layout.preferredWidth: 220
+      enabled: MediaService.viewedPlayer !== null
 
       from: 0
-
-      to: MediaService.viewedPlayer
-        ? MediaService.viewedPlayer.length
-        : 1
+      to: MediaService.viewedPlayer ? MediaService.viewedPlayer.length : 1
 
       Binding {
         target: positionSlider
         property: "value"
 
-        value: MediaService.viewedPlayer
-          ? MediaService.viewedPlayer.position
-          : 0
-
+        value: MediaService.viewedPlayer ? MediaService.viewedPlayer.position : 0
         when: !positionSlider.pressed
       }
 
       onInteraction: function(newPosition) {
-        if (MediaService.viewedPlayer)
+        if (MediaService.viewedPlayer) {
           MediaService.viewedPlayer.position = newPosition
+        }
       }
     }
   }
+
   RowLayout {
     Layout.alignment: Qt.AlignHCenter
+    spacing: Theme.sizes.spacingMedium
+
     StyledButton {
-      implicitWidth: 40
-      implicitHeight: 20
-      text: "back"
+      Layout.preferredWidth: 44
+      Layout.preferredHeight: 28
+      text: ""
       small: true
+      disabled: !MediaService.viewedPlayer
+
       onClicked: {
         if (MediaService.viewedPlayer) {
           MediaService.viewedPlayer.previous()
         }
       }
     }
+
     StyledButton {
-      implicitWidth: 40
-      implicitHeight: 20
-      text: "pause"
+      Layout.preferredWidth: 44
+      Layout.preferredHeight: 28
+      text: MediaService.viewedPlayer && MediaService.viewedPlayer.isPlaying ? "" : ""
       small: true
+      disabled: !MediaService.viewedPlayer
+
       onClicked: {
         if (MediaService.viewedPlayer) {
           MediaService.viewedPlayer.togglePlaying()
         }
       }
     }
+
     StyledButton {
-      implicitWidth: 40
-      implicitHeight: 20
-      text: "skip"
+      Layout.preferredWidth: 44
+      Layout.preferredHeight: 28
+      text: ""
       small: true
+      disabled: !MediaService.viewedPlayer
+
       onClicked: {
         if (MediaService.viewedPlayer) {
           MediaService.viewedPlayer.next()

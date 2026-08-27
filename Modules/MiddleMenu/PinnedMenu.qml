@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 
 import qs.Services
 import qs.Items.Styled
@@ -8,21 +9,25 @@ import qs.Items.Styled
 import "../../config.js" as Theme
 
 RowLayout {
-  clip: true
-  Image {
+  ClippingRectangle {
+    clip: true
     visible: MediaService.viewedPlayer
     Layout.alignment: Qt.AlignHCenter
-    Layout.preferredWidth: 30
-    Layout.preferredHeight: 30
-    
-    source: MediaService.viewedPlayer
-      ? MediaService.viewedPlayer.trackArtUrl
-      : ""
+    Layout.preferredWidth: 50
+    Layout.preferredHeight: 50
+    radius: Theme.sizes.radiusSmall
+    Image {
+      anchors.fill: parent
+      
+      source: MediaService.viewedPlayer
+        ? MediaService.viewedPlayer.trackArtUrl
+        : ""
 
-    fillMode: Image.PreserveAspectCrop
+      fillMode: Image.PreserveAspectCrop
 
-    smooth: true
-    mipmap: true
+      smooth: true
+      mipmap: true
+    }
   }
 
   ColumnLayout {
@@ -35,14 +40,13 @@ RowLayout {
       elide: Text.ElideRight
     }
 
-    // button layout
     RowLayout {
       Layout.alignment: Qt.AlignHCenter
       spacing: Theme.sizes.spacingLarge
 
       StyledButton {
         small: true
-        text: "󰼨"
+        text: ""
         disabled: !MediaService.viewedPlayer
 
         Layout.preferredWidth: 24
@@ -57,9 +61,7 @@ RowLayout {
 
       StyledButton {
         small: true
-        text: MediaService.viewedPlayer && MediaService.viewedPlayer.isPlaying
-          ? ""
-          : ""
+        text: MediaService.viewedPlayer && MediaService.viewedPlayer.isPlaying ? "" : ""
         disabled: !MediaService.viewedPlayer
 
         Layout.preferredWidth: 24
@@ -74,7 +76,7 @@ RowLayout {
 
       StyledButton {
         small: true
-        text: "󰼧"
+        text: ""
         disabled: !MediaService.viewedPlayer
 
         Layout.preferredWidth: 24

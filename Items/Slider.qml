@@ -1,68 +1,94 @@
 import QtQuick
+import "../config.js" as Theme
 
 Item {
-    id: root
+  id: root
 
-    property real value: 0
-    property real minimum: 0
-    property real maximum: 1
+  property real value: 0
+  property real minimum: 0
+  property real maximum: 1
 
-    property color backgroundColor: "#444444"
-    property color fillColor: "#999999"
+  property bool interactive: true
+  property bool disabled: false
 
-    property real barHeight: 6
-    property bool interactive: true
+  signal moved(real value)
+  signal interaction(real value)
 
-    signal moved(real value)
+  implicitWidth: 200
+  implicitHeight: Theme.sizes.sliderHandle
 
-    implicitWidth: 200
-    implicitHeight: 20
+  readonly property real progress: (maximum > minimum) 
+    ? Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)))
+    : 0
 
+  readonly property bool isPressed: mouseArea.pressed
+  readonly property bool isHovered: mouseArea.containsMouse
+
+  Rectangle {
+    id: track
+    anchors.verticalCenter: parent.verticalCenter
+    width: parent.width
+    height: Theme.sizes.sliderHeight
+    radius: height / 2
+
+    color: root.disabled 
+      ? Theme.colors.surfaceDisabled 
+      : Theme.colors.sliderBackground
 
     Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
+      width: parent.width * root.progress
+      height: parent.height
+      radius: parent.radius
 
-        width: parent.width
-        height: root.barHeight
-
-        radius: height / 2
-        color: root.backgroundColor
-
-
-        Rectangle {
-            width: parent.width * root.progress
-            height: parent.height
-
-            radius: parent.radius
-            color: root.fillColor
-        }
+      color: {
+        if (root.disabled) return Theme.colors.contentDisabled
+        if (root.isPressed) return Theme.colors.surfaceActive
+        if (root.isHovered) return Theme.colors.accentHover
+        return Theme.colors.sliderForeground
+      }
     }
 
+    Rectangle {
+      id: handle
+      x: (track.width * root.progress) - (width / 2)
+      anchors.verticalCenter: parent.verticalCenter
+      
+      width: Theme.sizes.sliderHandle
+      height: Theme.sizes.sliderHandle
+      radius: width / 2
 
-    MouseArea {
-        anchors.fill: parent
+      color: {
+        if (root.disabled) return Theme.colors.sliderHandleDisabled
+        if (root.isPressed) return Theme.colors.accent
+        if (root.isHovered) return Theme.colors.sliderHandleHover
+        return Theme.colors.sliderHandle
+      }
 
-        enabled: root.interactive
+      border.color: root.isPressed ? Theme.colors.borderActive : Theme.colors.border
+      border.width: root.isHovered ? Theme.sizes.borderWidthActive : Theme.sizes.borderWidth
+    }
+  }
 
-        onPressed: updateValue(mouse.x)
-        onPositionChanged: {
-            if (pressed)
-                updateValue(mouse.x)
-        }
+  MouseArea {
+    id: mouseArea
+    anchors.fill: parent
+    enabled: root.interactive && !root.disabled
+    hoverEnabled: true
+    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-        function updateValue(x) {
-            let percent = Math.max(0, Math.min(1, x / width))
-
-            root.value =
-                root.minimum +
-                (root.maximum - root.minimum) * percent
-
-            root.moved(root.value)
-        }
+    onPressed: updateValue(mouse.x)
+    onPositionChanged: {
+      if (pressed) updateValue(mouse.x)
     }
 
+    function updateValue(mouseX) {
+      let clampedX = Math.max(0, Math.min(track.width, mouseX))
+      let percent = clampedX / track.width
 
-    property real progress:
-        (root.value - root.minimum) /
-        (root.maximum - root.minimum)
+      let newValue = root.minimum + (root.maximum - root.minimum) * percent
+      root.value = newValue
+      root.moved(newValue)
+      root.interaction(newValue)
+    }
+  }
 }

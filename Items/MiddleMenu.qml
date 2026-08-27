@@ -15,11 +15,11 @@ PanelWindow {
       case "hover":
         return Qt.size(300, 300)
       case "pin":
-        return Qt.size(150, 40)
+        return Qt.size(200, 60)
       case "pinhover":
         return Qt.size(300, 300)
       default:
-        return Qt.size(100, 24)
+        return Qt.size(150, 24)
     }
   }
 
