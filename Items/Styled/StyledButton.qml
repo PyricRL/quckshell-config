@@ -14,7 +14,10 @@ Rectangle {
   property bool accentBg: true
   property bool disabled: false
 
+  property var bgColor: null
+
   signal clicked
+  signal wheelEvent(var event)
 
   radius: Theme.sizes.radiusSmall
 
@@ -22,6 +25,9 @@ Rectangle {
   border.color: Theme.colors.accent
 
   color: {
+    if (root.bgColor !== null) {
+      return root.bgColor
+    }
     if (!root.accentBg) {
       return "transparent"
     }
@@ -77,5 +83,10 @@ Rectangle {
     cursorShape: Qt.PointingHandCursor
 
     onClicked: root.clicked()
+
+    onWheel: function(event) {  
+      root.wheelEvent(event)
+      event.accepted = true
+    }
   }
 }

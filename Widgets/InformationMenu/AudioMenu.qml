@@ -21,7 +21,7 @@ Item {
       Layout.preferredHeight: Theme.bar.height
 
       Text {
-        text: "Notifications"
+        text: "Audio"
         color: Theme.colors.text
         font.family: Theme.bar.fontFamily
         font.pixelSize: Theme.bar.fontSize

@@ -1,87 +1,90 @@
-import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Notifications
 
-import "../../config.js" as Theme
 import qs.Items.Styled
+import "../../config.js" as Theme
 
 Rectangle {
-    id: card
+  id: card
 
-    required property var notification
+  required property var notification
 
-    Timer {
-        running: notification.urgency !== NotificationUrgency.Critical
-        interval: 5000
+  Timer {
+    running: notification.urgency !== NotificationUrgency.Critical
+    interval: Theme.notification.time
 
-        onTriggered: notification.dismiss()
+    onTriggered: notification.dismiss()
+  }
+
+  width: 320
+  Layout.preferredHeight: layout.implicitHeight + (Theme.sizes.paddingLarge * 3)
+
+  radius: Theme.sizes.radiusMedium
+  color: Theme.colors.backgroundDark
+
+  border.width: 1
+  border.color: {
+    switch (notification.urgency) {
+      case NotificationUrgency.Critical:
+        return Theme.colors.error
+      case NotificationUrgency.Low:
+        return Theme.colors.warning
+      default:
+        return Theme.colors.border
+    }
+  }
+
+  RowLayout {
+    id: layout
+
+    anchors {
+      left: parent.left
+      right: parent.right
+      top: parent.top
+      margins: Theme.sizes.paddingLarge
     }
 
-    Layout.fillWidth: true
-    Layout.preferredHeight: layout.implicitHeight + 20
+    spacing: Theme.sizes.spacingLarge
 
-    radius: Theme.sizes.radiusSmall
-
-    color: Theme.colors.background
-
-    border.width: 2 + Theme.sizes.borderWidth
-    border.color: notification.urgency === NotificationUrgency.Critical
-        ? Theme.colors.urgent
-        : Theme.colors.border
-
-    RowLayout {
-        id: layout
-
-        anchors.fill: parent
-        anchors.margins: 10
-
-        spacing: 10
-
-        Image {
-            Layout.preferredWidth: 36
-            Layout.preferredHeight: 36
-            Layout.alignment: Qt.AlignTop
-
-            fillMode: Image.PreserveAspectFit
-
-
-            visible: source.toString() !== ""
-
-            source: notification.image || notification.appIcon || ""
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 2
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text: notification.summary
-
-                font.pixelSize: 20
-                font.bold: true
-
-                elide: Text.ElideRight
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-
-                visible: text !== ""
-
-                text: notification.body
-
-                font.pixelSize: 16
-
-                wrapMode: Text.WordWrap
-            }
-        }
+    Image {
+      Layout.preferredWidth: 32
+      Layout.preferredHeight: 32
+      Layout.alignment: Qt.AlignTop
+      fillMode: Image.PreserveAspectFit
+      visible: source.toString() !== ""
+      source: notification.image || notification.appIcon || ""
     }
 
-    MouseArea {
-        anchors.fill: parent
+    ColumnLayout {
+      Layout.fillWidth: true
+      spacing: Theme.sizes.spacingMedium
 
-        onClicked: notification.dismiss()
+      StyledText {
+        Layout.fillWidth: true
+        text: notification.summary || ""
+        color: Theme.colors.text
+        font.family: Theme.bar.fontFamily
+        font.pixelSize: Theme.bar.fontSize
+        font.bold: true
+        elide: Text.ElideRight
+      }
+
+      StyledText {
+        Layout.fillWidth: true
+        visible: text !== ""
+        text: notification.body || ""
+        color: Theme.colors.textMuted
+        font.family: Theme.bar.fontFamily
+        font.pixelSize: Theme.bar.fontSizeSmall + 2
+        wrapMode: Text.WordWrap
+      }
     }
+  }
+
+  MouseArea {
+    anchors.fill: parent
+    cursorShape: Qt.PointingHandCursor
+    onClicked: notification.dismiss()
+  }
 }

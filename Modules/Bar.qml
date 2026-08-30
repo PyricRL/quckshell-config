@@ -47,6 +47,8 @@ PanelWindow {
           text: "|"
           small: true
         }
+        Audio {}
+        Mic {}
         Notifications {}
       }
     }

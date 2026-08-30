@@ -40,7 +40,6 @@ Item {
   implicitWidth: dropdown.width
   implicitHeight: dropdown.height
 
-  // --- Main Dropdown Header ---
   Rectangle {
     id: dropdown
 
@@ -48,14 +47,12 @@ Item {
     height: root.itemHeight
     radius: Theme.sizes.radiusSmall
 
-    // Background State Logic
     color: {
       if (dropdownArea.pressed || root.open) return Theme.colors.surfaceActive
       if (dropdownArea.containsMouse) return Theme.colors.surfaceHover
       return Theme.colors.surfaceInteractive
     }
 
-    // Border State Logic
     border.color: {
       if (root.open || dropdownArea.pressed) return Theme.colors.borderActive
       if (dropdownArea.containsMouse) return Theme.colors.borderHover
@@ -68,7 +65,6 @@ Item {
       text: root.currentText
       small: true
 
-      // Foreground State Logic
       color: {
         if (dropdownArea.pressed || root.open) return Theme.colors.contentActive
         if (dropdownArea.containsMouse) return Theme.colors.contentHover
@@ -86,7 +82,6 @@ Item {
     }
   }
 
-  // --- Dropdown Menu List ---
   Rectangle {
     id: menu
 
@@ -125,7 +120,6 @@ Item {
           height: root.itemHeight
           radius: Theme.sizes.radiusSmall
 
-          // Delegate Surface State
           color: {
             if (itemArea.pressed) return Theme.colors.surfaceActive
             if (isSelected) return Theme.colors.surfaceActive
@@ -138,7 +132,6 @@ Item {
             text: root.textForItem(modelData)
             small: true
 
-            // Delegate Content State
             color: {
               if (itemArea.pressed || isSelected) return Theme.colors.contentActive
               if (itemArea.containsMouse) return Theme.colors.contentHover

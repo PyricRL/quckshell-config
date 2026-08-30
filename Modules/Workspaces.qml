@@ -4,6 +4,8 @@ import QtQuick.Layouts
 import qs.Services
 import qs.Items.Styled
 
+import "../config.js" as Theme
+
 Item {
   implicitWidth: row.implicitWidth
   implicitHeight: row.implicitHeight
@@ -21,10 +23,19 @@ Item {
       StyledButton {
         visible: (index < 11) && (!model.output || model.output === "DP-3")
 
-        implicitWidth: 16
-        implicitHeight: 16
+        implicitWidth: 18
+        implicitHeight: 18
 
-        radius: width / 2
+        radius: Theme.sizes.radiusSmall
+
+        text: index
+        small: true
+
+        bgColor: model.isActive ? Theme.colors.surfaceActive : Theme.colors.surfaceInteractive
+
+        onClicked: {
+          NiriService.focusWorkspace(model.id)
+        }
       }
     }
   }

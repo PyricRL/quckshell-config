@@ -15,4 +15,8 @@ Singleton {
   }
 
   property alias workspaces: niri.workspaces
+
+  function focusWorkspace(id) {
+    niri.focusWorkspaceById(id)
+  }
 }

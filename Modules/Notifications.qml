@@ -16,6 +16,7 @@ StyledButton {
       Visibilities.setActiveModule("");
     } else {
       Visibilities.setActiveModule("informationmenu")
+      Visibilities.setActiveTab("notification")
     }
   }
 }

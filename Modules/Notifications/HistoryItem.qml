@@ -1,8 +1,9 @@
-import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Notifications
 
 import qs.Services
+import "../../config.js" as Theme
 
 Rectangle {
   id: card
@@ -10,28 +11,32 @@ Rectangle {
   required property var notification
   required property int index
 
-  implicitHeight: layout.implicitHeight + 20
+  implicitHeight: layout.implicitHeight + (Theme.sizes.paddingMedium * 2)
+  width: parent ? parent.width : 0
 
-  radius: 4
+  radius: Theme.sizes.radiusMedium
+  color: Theme.colors.surfaceInteractive
 
-  color: "#ffffff"
-
-  border.width: 2
+  border.width: 1
   border.color: notification.urgency === NotificationUrgency.Critical
-    ? "#ff0000" : "#00ff00"
-
+    ? Theme.colors.error
+    : Theme.colors.border
 
   RowLayout {
     id: layout
 
-    anchors.fill: parent
+    anchors {
+      left: parent.left
+      right: parent.right
+      top: parent.top
+      margins: Theme.sizes.paddingMedium
+    }
 
-    anchors.margins: 10
-    spacing: 4
+    spacing: Theme.sizes.spacingMedium
 
     Image {
-      Layout.preferredHeight: 36
-      Layout.preferredWidth: 36
+      Layout.preferredHeight: Theme.sizes.iconLarge
+      Layout.preferredWidth: Theme.sizes.iconLarge
       Layout.alignment: Qt.AlignTop
       fillMode: Image.PreserveAspectFit
       visible: source.toString() !== ""
@@ -42,35 +47,43 @@ Rectangle {
       id: column
       Layout.fillWidth: true
       Layout.alignment: Qt.AlignTop
-      spacing: 2
+      spacing: Theme.sizes.spacingSmall
 
       RowLayout {
         Layout.fillWidth: true
 
         Text {
           Layout.fillWidth: true
-          text: card.notification.summary
-          font.pixelSize: 20
+          text: card.notification.summary || ""
+          color: Theme.colors.text
+          font.family: Theme.bar.fontFamily
+          font.pixelSize: Theme.bar.fontSizeSmall
           font.bold: true
           elide: Text.ElideRight
         }
 
         Rectangle {
           Layout.alignment: Qt.AlignRight
-          width: 20
-          height: 20
-          radius: 4
-          color: "#ff0000"
+          width: Theme.sizes.iconMedium
+          height: Theme.sizes.iconMedium
+          radius: Theme.sizes.radiusSmall
+          color: closeArea.containsMouse ? Theme.colors.surfaceHover : "transparent"
 
           Text {
             anchors.centerIn: parent
-            text: "X"
+            text: "✕"
+            color: closeArea.containsMouse ? Theme.colors.contentHover : Theme.colors.textMuted
+            font.family: Theme.bar.fontFamily
+            font.pixelSize: 10
           }
 
           MouseArea {
+            id: closeArea
             anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             onClicked: {
-              NotificationService.history.remove(index)
+              NotificationService.history.remove(card.index)
             }
           }
         }
@@ -78,25 +91,26 @@ Rectangle {
 
       Rectangle {
         Layout.fillWidth: true
-        height: 1
-        color: "#000000"
+        implicitHeight: 1
+        color: Theme.colors.border
       }
 
       Text {
         Layout.fillWidth: true
-        Layout.preferredWidth: column.width
-        width: column.width
-
-        text: card.notification.body
-        font.pixelSize: 16
+        text: card.notification.body || ""
+        color: Theme.colors.textMuted
+        font.family: Theme.bar.fontFamily
+        font.pixelSize: Theme.bar.fontSizeSmall
         wrapMode: Text.WordWrap
       }
 
       Text {
-          Layout.alignment: Qt.AlignRight
-          text: notification.time
-          font.pixelSize: 15
-        }
+        Layout.alignment: Qt.AlignRight
+        text: card.notification.time || ""
+        color: Theme.colors.textDisabled
+        font.family: Theme.bar.fontFamily
+        font.pixelSize: Theme.bar.fontSizeSmall - 2
+      }
     }
   }
 }

@@ -7,7 +7,7 @@ Singleton {
   id: root
 
   property string currentActiveModule: ""
-  property string currentActiveTab: ""
+  property string currentActiveTab: "network"
 
   function setActiveModule(modulename) {
     if (modulename) {
