@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
+import Quickshell.Services.Pipewire
+
 import qs.Items
 import qs.Items.Styled
 import qs.Services
@@ -11,6 +13,10 @@ import "../../config.js" as Theme
 
 Item {
   id: root
+  
+  PwObjectTracker {
+    objects: [Pipewire.defaultAudioSource, Pipewire.defaultAudioSink]
+  }
 
   ColumnLayout {
     anchors.fill: parent
@@ -28,17 +34,6 @@ Item {
         font.bold: true
         Layout.fillWidth: true
       }
-
-      StyledButton {
-        implicitWidth: 65
-        implicitHeight: 22
-        radius: Theme.sizes.radiusSmall
-        text: "Clear All"
-        small: true
-        visible: NotificationService.history.count > 0
-
-        onClicked: NotificationService.history.clear()
-      }
     }
 
     Rectangle {
@@ -48,49 +43,35 @@ Item {
     }
 
     Item {
+      id: audioSelection
+      property string selectedSection: "output"
+
       Layout.fillWidth: true
       Layout.fillHeight: true
 
-      ColumnLayout {
-        anchors.centerIn: parent
-        spacing: Theme.sizes.spacingSmall
-        visible: NotificationService.history.count === 0
+      RowLayout {
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width
+        StyledCheckbox {
+          Layout.fillWidth: true
+          Layout.preferredWidth: 1
+          text: "Output"
 
-        Text {
-          text: "󰂛"
-          color: Theme.colors.textMuted
-          font.family: Theme.bar.fontFamily
-          font.pixelSize: 32
-          Layout.alignment: Qt.AlignHCenter
+          selected: audioSelection.selectedSection === "output"
+
+          onClicked: {
+            audioSelection.selectedSection = "output"
+          }
         }
+        StyledCheckbox {
+          Layout.fillWidth: true
+          Layout.preferredWidth: 1
+          text: "Input"
 
-        Text {
-          text: "No Notifications"
-          color: Theme.colors.textMuted
-          font.family: Theme.bar.fontFamily
-          font.pixelSize: Theme.bar.fontSizeSmall
-          Layout.alignment: Qt.AlignHCenter
-        }
-      }
+          selected: audioSelection.selectedSection === "input"
 
-      ScrollView {
-        id: scroll
-        anchors.fill: parent
-        clip: true
-        visible: NotificationService.history.count > 0
-
-        ListView {
-          id: notificationList
-          width: scroll.availableWidth
-          model: NotificationService.history
-          spacing: Theme.sizes.spacingSmall
-          interactive: true
-
-          delegate: HistoryItem {
-            required property var modelData
-
-            width: notificationList.width
-            notification: modelData
+          onClicked: {
+            audioSelection.selectedSection = "input"
           }
         }
       }

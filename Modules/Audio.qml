@@ -8,23 +8,24 @@ import qs.Items.Styled
 
 StyledButton {
   PwObjectTracker {
-    id: sinkTracker
-    objects: [Pipewire.defaultAudioSink]
+    objects: [Pipewire.defaultAudioSource]
   }
 
   text: {
-    const sink = Pipewire.defaultAudioSink
-    if (sink && sink.bound && sink.audio) {
-      return ""
+    const source = Pipewire.defaultAudioSource
+
+    if (!source || !source.ready || !source.audio) {
+      return " "
     }
 
-    const vol = sink.audio.volume
-    if (vol === 0) return ""
-    if (vol < 0.5) return ""
-    return ""
-  }
-  small: true
+    if (source.audio.muted || source.audio.volume === 0) {
+      return "  "
+    }
 
+    return "  "
+  }
+
+  small: true
   accentBg: false
   accentText: true
 
@@ -35,25 +36,5 @@ StyledButton {
       Visibilities.setActiveModule("informationmenu")
       Visibilities.setActiveTab("audio")
     }
-  }
-
-  onWheelEvent: function(event) {
-    const sink = Pipewire.defaultAudioSink
-
-    if (!sink || !sink.ready || !sink.audio) {
-      return
-    }
-
-    const step = 0.05
-    const currentVol = sink.audio.volume
-    let newVol = currentVol
-
-    if (event.angleDelta.y > 0) {
-      newVol = Math.min(1.0, currentVol + step)
-    } else if (event.angleDelta.y < 0) {
-      newVol = Math.max(0.0, currentVol - step)
-    }
-
-    sink.audio.volume = newVol
-  }
+  } 
 }

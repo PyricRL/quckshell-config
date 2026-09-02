@@ -15,7 +15,7 @@ Item {
 
   Row {
     id: row
-    spacing: 4
+    spacing: Theme.sizes.spacingSmall
 
     Repeater {
       model: NiriService.workspaces

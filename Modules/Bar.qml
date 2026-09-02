@@ -48,7 +48,10 @@ PanelWindow {
           small: true
         }
         Audio {}
-        Mic {}
+        StyledText {
+          text: "|"
+          small: true
+        }
         Notifications {}
       }
     }

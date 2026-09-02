@@ -40,54 +40,50 @@ PanelWindow {
         Layout.alignment: Qt.AlignTop
         spacing: Theme.sizes.spacingSmall
 
-        StyledButton {
+        StyledCheckbox {
           implicitWidth: 32
           implicitHeight: 32
           radius: Theme.sizes.radiusMedium
           text: "N"
           small: true
 
-          accentBg: Visibilities.currentActiveTab === "network"
-          accentText: Visibilities.currentActiveTab === "network"
+          selected: Visibilities.currentActiveTab === "network"
 
           onClicked: Visibilities.setActiveTab("network")
         }
 
-        StyledButton {
+        StyledCheckbox {
           implicitWidth: 32
           implicitHeight: 32
           radius: Theme.sizes.radiusMedium
           text: "A"
           small: true
 
-          accentBg: Visibilities.currentActiveTab === "audio"
-          accentText: Visibilities.currentActiveTab === "audio"
+          selected: Visibilities.currentActiveTab === "audio"
 
           onClicked: Visibilities.setActiveTab("audio")
         }
 
-        StyledButton {
+        StyledCheckbox {
           implicitWidth: 32
           implicitHeight: 32
           radius: Theme.sizes.radiusMedium
           text: "S"
           small: true
 
-          accentBg: Visibilities.currentActiveTab === "system"
-          accentText: Visibilities.currentActiveTab === "system"
+          selected: Visibilities.currentActiveTab === "system"
 
           onClicked: Visibilities.setActiveTab("system")
         }
 
-        StyledButton {
+        StyledCheckbox {
           implicitWidth: 32
           implicitHeight: 32
           radius: Theme.sizes.radiusMedium
           text: "No"
           small: true
 
-          accentBg: Visibilities.currentActiveTab === "notification"
-          accentText: Visibilities.currentActiveTab === "notification"
+          selected: Visibilities.currentActiveTab === "notification"
 
           onClicked: Visibilities.setActiveTab("notification")
         }
