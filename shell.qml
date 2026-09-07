@@ -1,27 +1,10 @@
 import Quickshell
 import QtQuick
 
-import "Modules" as Modules
-import "Widgets" as Widgets
-
-import "Widgets/InformationMenu" as InformationMenu
-
-import "Modules/Notifications" as Notifications
-
-import "Services" as Services
+import qs.Panels as Panels
 
 Scope {
   id: shell
 
-  Modules.Bar {}
-
-  Widgets.PowerMenu {}
-
-  Widgets.NotificationMenu {}
-
-  InformationMenu.InformationMenu {}
-
-  Notifications.NotificationPopup {}
-
-  Services.IPCService {}
+  Panels.Bar {}
 }
