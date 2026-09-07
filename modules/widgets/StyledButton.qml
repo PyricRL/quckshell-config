@@ -1,6 +1,6 @@
 import QtQuick
 
-import qs.Themes
+import qs.themes
 
 Rectangle {
     id: root

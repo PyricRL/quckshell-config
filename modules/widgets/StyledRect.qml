@@ -1,5 +1,7 @@
 import QtQuick
-import Quickshell
+
+import qs.themes
 
 Rectangle {
+  id: root
 }

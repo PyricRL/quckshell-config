@@ -1,10 +1,10 @@
 import Quickshell
 import QtQuick
 
-import qs.Panels as Panels
+import qs.modules.interface.bar
 
 Scope {
   id: shell
 
-  Panels.Bar {}
+  Bar {}
 }
