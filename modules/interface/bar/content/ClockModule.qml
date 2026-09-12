@@ -29,10 +29,8 @@ Item {
   Column {
     id: clockColumn
 
-    anchors.leftMargin: 4
-    anchors.rightMargin: 4
-
     anchors.fill: parent
+
     spacing: -3
 
     StyledText {

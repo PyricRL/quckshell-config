@@ -17,14 +17,13 @@ Item {
     id: bgRect
 
     color: Colors.background
-    implicitWidth: layout.implicitWidth + 10
+    implicitWidth: layout.implicitWidth + 8
     implicitHeight: 32
     radius: 6
 
     RowLayout {
       id: layout
       anchors.centerIn: parent
-      spacing: 12
     }
   }
 }

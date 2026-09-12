@@ -7,8 +7,8 @@ import qs.themes
 Text {
   id: root
 
-  property int fontSize
-  property bool bold
+  property int fontSize: 14
+  property bool bold: false
 
   renderType: Text.NativeRendering
   textFormat: Text.PlainText

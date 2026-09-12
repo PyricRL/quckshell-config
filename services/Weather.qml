@@ -21,15 +21,15 @@ Scope {
         const code = parseInt(weatherCode)
         if (isNaN(code)) return "󰖐"
 
-        if (code === 113) return "󰖙"                                             // Sunny / Clear
-        if (code === 116) return "󰖕"                                             // Partly Cloudy
+        if (code === 113) return ""                                             // Sunny / Clear
+        if (code === 116) return ""                                            // Partly Cloudy
         if ([119, 122].includes(code)) return "󰖐"                              // Cloudy / Overcast
-        if ([143, 248, 260].includes(code)) return "I"                          // Fog / Mist
-        if ([176, 293, 296, 300, 302, 308].includes(code)) return "󰖗"             // Rain / Drizzle
-        if ([200, 386, 389, 392, 395].includes(code)) return "󰙾"                  // Thunderstorm
-        if ([179, 227, 230, 323, 326, 338, 368].includes(code)) return "󰼶"        // Snow
+        if ([143, 248, 260].includes(code)) return ""                          // Fog / Mist
+        if ([176, 293, 296, 300, 302, 308].includes(code)) return ""             // Rain / Drizzle
+        if ([200, 386, 389, 392, 395].includes(code)) return ""                  // Thunderstorm
+        if ([179, 227, 230, 323, 326, 338, 368].includes(code)) return ""        // Snow
         
-        return "󰖙"
+        return ""
     }
 
     Process {

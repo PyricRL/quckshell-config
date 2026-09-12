@@ -31,7 +31,4 @@ QtObject {
     readonly property color warning: "#e0af68"
     readonly property color success: "#9ece6a"
     readonly property color info: "#0db9d7"
-
-    readonly property color disabled: "#565f89"
-    readonly property color disabledOn: "#3b4261"
 }

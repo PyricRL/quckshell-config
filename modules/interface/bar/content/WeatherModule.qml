@@ -28,7 +28,7 @@ Item {
     id: weatherLayout
     anchors.centerIn: parent
 
-    StyledText {
+    StyledSymbol {
       text: Weather.icon
       font.family: "JetBrainsMono Nerd Font"
       fontSize: 32

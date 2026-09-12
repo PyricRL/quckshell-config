@@ -21,10 +21,10 @@ Scope {
     }
 
     margins {
-      top: 2
+      top: 4
       left: 4
       right: 4
-      bottom: 2
+      bottom: 0
     }
 
     implicitHeight: 32
