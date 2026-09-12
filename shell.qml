@@ -6,6 +6,8 @@ import qs.modules.interface.launcher
 
 import qs.services
 
+import qs.modules.widgets
+
 Scope {
   id: shell
 

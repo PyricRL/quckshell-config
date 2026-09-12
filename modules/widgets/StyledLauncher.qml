@@ -3,23 +3,51 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Wayland
 
 import qs.themes
+import qs.modules.functions
+import qs.modules.widgets
+import qs.extras
 
-Item {
+PanelWindow {
     id: root
 
+    // Configuration API
     property ListModel sourceModel
     property string placeholderText: "Search..."
     property int selectedIndex: 0
+    property bool active: false
 
-    // Custom Signal
+    // Control window visibility directly
+    visible: active
+    WlrLayershell.keyboardFocus: active ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
+
+    color: "transparent"
+
+    // Custom Signals
     signal itemSelected(var item)
+    signal closeRequested()
 
-    ListModel { id: displayModel }
+    ListModel { id: filteredModel }
 
-    function refreshFilter(query) {
-        displayModel.clear()
+    // Timer to debounce filter updates and prevent UI freeze
+    Timer {
+        id: filterDebounceTimer
+        interval: 50
+        repeat: false
+        onTriggered: root.updateFilter(searchInput.text)
+    }
+
+    function updateFilter(query) {
+        filteredModel.clear()
         if (!sourceModel) return
 
         const q = (query || "").toLowerCase().trim()
@@ -29,147 +57,245 @@ Item {
             const commentLower = (item.comment || "").toLowerCase()
 
             if (q === "" || nameLower.includes(q) || commentLower.includes(q)) {
-                displayModel.append(item)
+                filteredModel.append(item)
             }
         }
 
-        selectedIndex = displayModel.count > 0 ? 0 : -1
+        selectedIndex = filteredModel.count > 0 ? 0 : -1
         listView.currentIndex = selectedIndex
     }
 
-    onSourceModelChanged: refreshFilter(searchInput.text)
+    // Safely observe model changes with debouncing
+    Connections {
+        target: sourceModel
+        ignoreUnknownSignals: true
+        function onRowsInserted() { filterDebounceTimer.restart() }
+        function onModelReset() { filterDebounceTimer.restart() }
+    }
 
-    ColumnLayout {
+    onSourceModelChanged: updateFilter(searchInput.text)
+
+    onVisibleChanged: {
+        if (visible) {
+            searchInput.text = ""
+            updateFilter("")
+            searchInput.forceActiveFocus()
+        }
+    }
+
+    // Dismiss window when clicking the background overlay
+    MouseArea {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 12
+        onClicked: root.closeRequested()
+    }
 
-        StyledRect {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 42
-            radius: 8
-            color: Colors.surfaceContainerLow
+    // Container box holding search input and list view
+    StyledRect {
+        id: container
+        anchors.centerIn: parent
+        width: 600
+        height: 480
+        radius: 6
+        color: Colors.background
 
-            TextField {
-                id: searchInput
-                anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 12
-                placeholderText: root.placeholderText
-                placeholderTextColor: Colors.surfaceVariantOn
-                color: Colors.backgroundOn
-                font.pixelSize: 14
-                background: null
-                focus: true
-
-                onTextChanged: root.refreshFilter(text)
-
-                Keys.onPressed: (event) => {
-                    if (event.key === Qt.Key_Down || (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier))) {
-                        if (displayModel.count > 0) {
-                            root.selectedIndex = (root.selectedIndex + 1) % displayModel.count
-                            listView.currentIndex = root.selectedIndex
-                            listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
-                        }
-                        event.accepted = true
-                    } else if (event.key === Qt.Key_Up || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
-                        if (displayModel.count > 0) {
-                            root.selectedIndex = (root.selectedIndex - 1 + displayModel.count) % displayModel.count
-                            listView.currentIndex = root.selectedIndex
-                            listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
-                        }
-                        event.accepted = true
-                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                        if (displayModel.count > 0 && root.selectedIndex >= 0 && root.selectedIndex < displayModel.count) {
-                            const selectedItem = displayModel.get(root.selectedIndex)
-                            console.log("[StyledLauncher] Executing via Enter:", selectedItem.name, selectedItem.exec)
-                            root.itemSelected(selectedItem)
-                        } else {
-                            console.warn("[StyledLauncher] Enter pressed but selection is invalid. Index:", root.selectedIndex)
-                        }
-                        event.accepted = true
-                    }
-                }
-            }
+        // Prevent background clicks inside the card from closing the window
+        MouseArea {
+            anchors.fill: parent
+            onClicked: (mouse) => mouse.accepted = true
         }
 
-        ListView {
-            id: listView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            model: displayModel
-            currentIndex: root.selectedIndex
-            clip: true
-            spacing: 4
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 12
 
-            delegate: StyledRect {
-                id: delegateRect
-                property bool isSelected: listView.currentIndex === index
+            // Search Bar Input
+            StyledRect {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 44
+                radius: 8
+                color: Colors.surfaceContainerLow
 
-                width: listView.width
-                implicitHeight: 52
-                radius: 6
-                color: isSelected ? Colors.primaryContainer : "transparent"
-
-                RowLayout {
+                TextField {
+                    id: searchInput
                     anchors.fill: parent
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
-                    spacing: 12
+                    placeholderText: root.placeholderText
+                    placeholderTextColor: Colors.surfaceVariantOn
+                    color: Colors.backgroundOn
+                    font.pixelSize: 14
+                    background: null
+                    focus: true
 
-                    Item {
-                        Layout.preferredWidth: 28
-                        Layout.preferredHeight: 28
+                    onTextChanged: root.updateFilter(text)
 
-                        IconImage {
-                            anchors.fill: parent
-                            visible: model.icon !== undefined && model.icon !== ""
-                            source: model.icon !== undefined ? model.icon : ""
+                    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_Tab && (event.modifiers & Qt.ControlModifier)) {
+                            const modes = ["apps", "clipboard", "system"]
+                            let idx = modes.indexOf(States.launcherMode)
+                            if (event.modifiers & Qt.ShiftModifier) {
+                                idx = (idx - 1 + modes.length) % modes.length
+                            } else {
+                                idx = (idx + 1) % modes.length
+                            }
+                            States.setLauncherMode(modes[idx])
+                            event.accepted = true
+                            return
                         }
 
-                        StyledSymbol {
-                            anchors.centerIn: parent
-                            Layout.preferredWidth: 24
-                            Layout.preferredHeight: 24
-                            iconSize: 24
-                            icon: (model.symbol !== undefined && model.symbol !== "") ? model.symbol : "application"
-                            color: isSelected ? Colors.primaryContainerOn : Colors.surfaceVariantOn
-                            visible: model.icon === undefined || model.icon === ""
-                        }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
-                        StyledText {
-                            text: model.name || ""
-                            color: isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
-                            font.bold: true
-                            font.pixelSize: 13
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                        }
-
-                        StyledText {
-                            text: model.comment || model.exec || ""
-                            color: isSelected ? ColorUtils.applyAlpha(Colors.primaryContainerOn, 0.75) : Colors.surfaceVariantOn
-                            font.pixelSize: 11
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                            visible: text !== ""
+                        if (event.key === Qt.Key_Down || (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier))) {
+                            if (filteredModel.count > 0) {
+                                root.selectedIndex = (root.selectedIndex + 1) % filteredModel.count
+                                listView.currentIndex = root.selectedIndex
+                                listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                            }
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Up || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                            if (filteredModel.count > 0) {
+                                root.selectedIndex = (root.selectedIndex - 1 + filteredModel.count) % filteredModel.count
+                                listView.currentIndex = root.selectedIndex
+                                listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                            }
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            if (filteredModel.count > 0 && root.selectedIndex >= 0 && root.selectedIndex < filteredModel.count) {
+                                root.itemSelected(filteredModel.get(root.selectedIndex))
+                            }
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Escape) {
+                            root.closeRequested()
+                            event.accepted = true
                         }
                     }
                 }
+            }
 
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: listView.currentIndex = index
-                    onClicked: {
-                        const clickedItem = displayModel.get(index)
-                        console.log("[StyledLauncher] Executing via Click:", clickedItem.name, clickedItem.exec)
-                        root.itemSelected(clickedItem)
+            // Tab Bar Switcher
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                Repeater {
+                    model: [
+                        { id: "apps", label: "Applications" },
+                        { id: "clipboard", label: "Clipboard" },
+                        { id: "system", label: "System Actions" },
+                        { id: "wallpaper", label: "Wallpapers"},
+                    ]
+
+                    delegate: StyledRect {
+                        property bool isCurrent: States.launcherMode === modelData.id
+                        Layout.fillWidth: true
+                        implicitHeight: 32
+                        radius: 6
+                        color: isCurrent ? Colors.primaryContainer : Colors.surfaceContainerLow
+
+                        StyledText {
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: isCurrent ? Colors.primaryContainerOn : Colors.surfaceVariantOn
+                            font.bold: isCurrent
+                            font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                States.setLauncherMode(modelData.id)
+                                searchInput.forceActiveFocus()
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Results List
+            ListView {
+                id: listView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: filteredModel
+                currentIndex: root.selectedIndex
+                clip: true
+                spacing: 4
+
+                delegate: StyledRect {
+                    property bool isSelected: listView.currentIndex === index
+
+                    width: listView.width
+                    implicitHeight: 48
+                    radius: 6
+                    color: isSelected ? Colors.primaryContainer : "transparent"
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 12
+
+                        Item {
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
+
+                            // Renders file-path image previews (e.g., file:///tmp/cliphist-previews/1.png)
+                            Image {
+                                id: imgPreview
+                                anchors.fill: parent
+                                visible: model.icon !== undefined && model.icon !== "" && model.icon.startsWith("file://")
+                                source: visible ? model.icon : ""
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                cache: true
+                                mipmap: true
+                            }
+
+                            // Renders standard desktop application icons (e.g., "firefox")
+                            IconImage {
+                                anchors.fill: parent
+                                visible: model.icon !== undefined && model.icon !== "" && !model.icon.startsWith("file://")
+                                source: visible ? model.icon : ""
+                            }
+
+                            // Renders symbol fallback when no icon/preview path is provided
+                            StyledSymbol {
+                                anchors.centerIn: parent
+                                iconSize: 20
+                                icon: (model.symbol !== undefined && model.symbol !== "") ? model.symbol : "application"
+                                color: isSelected ? Colors.primaryContainerOn : Colors.surfaceVariantOn
+                                visible: (model.icon === undefined || model.icon === "")
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            StyledText {
+                                text: model.name || ""
+                                color: isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
+                                font.bold: true
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            StyledText {
+                                text: model.comment || model.exec || ""
+                                color: isSelected ? ColorUtils.applyAlpha(Colors.primaryContainerOn, 0.75) : Colors.surfaceVariantOn
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                                visible: text !== ""
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: listView.currentIndex = index
+                        onClicked: root.itemSelected(filteredModel.get(index))
                     }
                 }
             }

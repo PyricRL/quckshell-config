@@ -12,7 +12,7 @@ Scope {
 
     required property var modelData
 
-    screen: Quickshell.screens[1]
+    screen: Quickshell.screens.find(screen => screen.name === "DP-3")
 
     anchors {
       top: true
