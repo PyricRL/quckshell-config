@@ -47,7 +47,6 @@ Item {
         }
     }
 
-    // Function to reload clipboard entries
     function fetchClipboard() {
         clipboardModel.clear()
         clipboardLoader.running = false
@@ -55,12 +54,11 @@ Item {
     }
 
     function fetchWallpapers() {
-      wallpaperModel.clear()
-      wallpaperLoader.running = false
-      wallpaperLoader.running = true
+        wallpaperModel.clear()
+        wallpaperLoader.running = false
+        wallpaperLoader.running = true
     }
 
-    // Reload clipboard when launcher opens or mode switches to clipboard
     Connections {
         target: States
         function onLauncherModeChanged() {
@@ -68,7 +66,7 @@ Item {
                 root.fetchClipboard()
             }
             if (States.currentActiveModule === "launcher" && States.launcherMode === "wallpaper") {
-              root.fetchWallpapers()
+                root.fetchWallpapers()
             }
         }
         function onCurrentActiveModuleChanged() {
@@ -78,94 +76,91 @@ Item {
         }
     }
 
-    // 2. Clipboard Loader Process with Image Extraction
-   Process {
-     id: clipboardLoader
-    running: false
-    command: [
-        "bash",
-        "-c",
-        "mkdir -p /tmp/cliphist-previews; " +
-        "cliphist list | head -50 | { count=50; while read -r line; do " +
-        "  id=$(echo \"$line\" | cut -f1); " +
-        "  text=$(echo \"$line\" | cut -f2-); " +
-        "  if echo \"$text\" | grep -qiE '\\[\\[ binary data.*(png|jpg|jpeg|webp)'; then " +
-        "    imgpath=\"/tmp/cliphist-previews/$id.png\"; " +
-        "    if [ ! -s \"$imgpath\" ]; then cliphist decode \"$id\" > \"$imgpath\" 2>/dev/null; fi; " +
-        "    if [ -f \"$imgpath\" ] && [ -s \"$imgpath\" ]; then " +
-        "      dimensions=$(identify -format '%wx%h' \"$imgpath\" 2>/dev/null || echo 'unknown'); " +
-        "      filesize=$(du -h \"$imgpath\" | cut -f1); " +
-        "      echo \"$count|Image ($dimensions, $filesize)|file://$imgpath\"; " +
-        "    fi; " +
-        "  else " +
-        "    echo \"$count|$text|$id\"; " +
-        "  fi; " +
-        "  count=$((count - 1)); " +
-        "done; }"
-    ] 
+    // 2. Clipboard Loader Process
+    Process {
+        id: clipboardLoader
+        running: false
+        command: [
+            "bash",
+            "-c",
+            "mkdir -p /tmp/cliphist-previews; " +
+            "cliphist list | head -50 | { count=50; while read -r line; do " +
+            "  id=$(echo \"$line\" | cut -f1); " +
+            "  text=$(echo \"$line\" | cut -f2-); " +
+            "  if echo \"$text\" | grep -qiE '\\[\\[ binary data.*(png|jpg|jpeg|webp)'; then " +
+            "    imgpath=\"/tmp/cliphist-previews/$id.png\"; " +
+            "    if [ ! -s \"$imgpath\" ]; then cliphist decode \"$id\" > \"$imgpath\" 2>/dev/null; fi; " +
+            "    if [ -f \"$imgpath\" ] && [ -s \"$imgpath\" ]; then " +
+            "      dimensions=$(identify -format '%wx%h' \"$imgpath\" 2>/dev/null || echo 'unknown'); " +
+            "      filesize=$(du -h \"$imgpath\" | cut -f1); " +
+            "      echo \"$count|Image ($dimensions, $filesize)|file://$imgpath\"; " +
+            "    fi; " +
+            "  else " +
+            "    echo \"$count|$text|$id\"; " +
+            "  fi; " +
+            "  count=$((count - 1)); " +
+            "done; }"
+        ]
 
-      stdout: SplitParser {
-          splitMarker: "\n"
-          onRead: (data) => {
-              const line = data.trim()
-              if (!line) return
-              
-              const parts = line.split("|")
-              if (parts.length >= 2) {
-                  const position = parts[0].trim()
-                  const rawText = parts[1].trim()
-                  const clipboardId = parts[2] ? parts[2].trim() : ""
-                  const imagePath = parts[1].includes("Image (") ? parts[2].trim() : ""
+        stdout: SplitParser {
+            splitMarker: "\n"
+            onRead: (data) => {
+                const line = data.trim()
+                if (!line) return
+                
+                const parts = line.split("|")
+                if (parts.length >= 2) {
+                    const position = parts[0].trim()
+                    const rawText = parts[1].trim()
+                    const clipboardId = parts[2] ? parts[2].trim() : ""
+                    const imagePath = parts[1].includes("Image (") ? parts[2].trim() : ""
 
-                  // Only add if we have valid data
-                  if (position && rawText) {
-                      clipboardModel.append({
-                          "name": rawText,
-                          "comment": "Clipboard item #" + position,
-                          "icon": imagePath,
-                          "symbol": imagePath !== "" ? "" : "",
-                          "exec": clipboardId
-                      })
-                  }
-              }
-          }
-       }
+                    if (position && rawText) {
+                        clipboardModel.append({
+                            "name": rawText,
+                            "comment": "Clipboard item #" + position,
+                            "icon": imagePath,
+                            "symbol": imagePath !== "" ? "" : "",
+                            "exec": clipboardId
+                        })
+                    }
+                }
+            }
+        }
     } 
 
-   Process {
-    id: wallpaperLoader
-    running: false
+    Process {
+        id: wallpaperLoader
+        running: false
 
-    command: [
-        "bash",
-        "-c",
-        "find \"$HOME/.background-image\" -maxdepth 1 -type f " +
-        "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) " +
-        "-printf '%f|%p\\n'"
-    ]
+        command: [
+            "bash",
+            "-c",
+            "find \"$HOME/.background-image\" -maxdepth 1 -type f " +
+            "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) " +
+            "-printf '%f|%p\\n'"
+        ]
 
-    stdout: SplitParser {
-        splitMarker: "\n"
+        stdout: SplitParser {
+            splitMarker: "\n"
+            onRead: (data) => {
+                const line = data.trim()
+                if (!line) return
 
-        onRead: (data) => {
-            const line = data.trim()
-            if (!line) return
+                const parts = line.split("|")
+                if (parts.length < 2) return
 
-            const parts = line.split("|")
-            if (parts.length < 2) return
-
-            wallpaperModel.append({
-                "name": parts[0].trim(),
-                "comment": "Wallpaper",
-                "icon": "file://" + parts[1].trim(),
-                "symbol": "󰸉",
-                "exec": parts[1].trim()
-            })
+                wallpaperModel.append({
+                    "name": parts[0].trim(),
+                    "comment": "Wallpaper",
+                    "icon": "file://" + parts[1].trim(),
+                    "symbol": "󰸉",
+                    "exec": parts[1].trim()
+                })
+            }
         }
     }
-} 
 
-    // Dynamic model lookup helper
     function getActiveModel() {
         if (States.launcherMode === "clipboard") return clipboardModel
         if (States.launcherMode === "system") return systemModel
@@ -173,7 +168,6 @@ Item {
         return appModel
     }
 
-    // Dynamic placeholder text helper
     function getPlaceholderText() {
         if (States.launcherMode === "clipboard") return "Search clipboard..."
         if (States.launcherMode === "system") return "Search system actions..."
@@ -186,6 +180,7 @@ Item {
         active: States.currentActiveModule === "launcher"
         placeholderText: root.getPlaceholderText()
         sourceModel: root.getActiveModel()
+        gridMode: States.launcherMode === "wallpaper"
 
         onCloseRequested: States.setActiveModule("")
 
@@ -198,6 +193,7 @@ Item {
                 Quickshell.execDetached(["bash", "-c", item.exec])
             } else if (States.launcherMode === "wallpaper") {
                 Quickshell.execDetached(["awww", "img", item.exec, "--transition-type", "fade", "--transition-duration", "0.7" ])
+                Quickshell.execDetached(["matugen", "image", item.exec, "-m", "dark", "--source-color-index", "0"])
             } else {
                 let cleanExec = item.exec.replace(/%[fFuUiIdDnNkKmMsS]/g, "").trim()
                 Quickshell.execDetached(["bash", "-c", cleanExec])

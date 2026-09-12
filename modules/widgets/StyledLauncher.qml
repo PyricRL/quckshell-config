@@ -18,6 +18,7 @@ PanelWindow {
     property string placeholderText: "Search..."
     property int selectedIndex: 0
     property bool active: false
+    property bool gridMode: false
 
     // Control window visibility directly
     visible: active
@@ -37,6 +38,8 @@ PanelWindow {
     signal closeRequested()
 
     ListModel { id: filteredModel }
+
+    readonly property int itemGridColumns: 3
 
     // Timer to debounce filter updates and prevent UI freeze
     Timer {
@@ -62,10 +65,13 @@ PanelWindow {
         }
 
         selectedIndex = filteredModel.count > 0 ? 0 : -1
-        listView.currentIndex = selectedIndex
+        if (root.gridMode) {
+            gridView.currentIndex = selectedIndex
+        } else {
+            listView.currentIndex = selectedIndex
+        }
     }
 
-    // Safely observe model changes with debouncing
     Connections {
         target: sourceModel
         ignoreUnknownSignals: true
@@ -89,7 +95,7 @@ PanelWindow {
         onClicked: root.closeRequested()
     }
 
-    // Container box holding search input and list view
+    // Container box holding search input and view layouts
     StyledRect {
         id: container
         anchors.centerIn: parent
@@ -98,7 +104,6 @@ PanelWindow {
         radius: 6
         color: Colors.background
 
-        // Prevent background clicks inside the card from closing the window
         MouseArea {
             anchors.fill: parent
             onClicked: (mouse) => mouse.accepted = true
@@ -132,7 +137,7 @@ PanelWindow {
 
                     Keys.onPressed: (event) => {
                         if (event.key === Qt.Key_Tab && (event.modifiers & Qt.ControlModifier)) {
-                            const modes = ["apps", "clipboard", "system"]
+                            const modes = ["apps", "clipboard", "system", "wallpaper"]
                             let idx = modes.indexOf(States.launcherMode)
                             if (event.modifiers & Qt.ShiftModifier) {
                                 idx = (idx - 1 + modes.length) % modes.length
@@ -144,21 +149,55 @@ PanelWindow {
                             return
                         }
 
-                        if (event.key === Qt.Key_Down || (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier))) {
-                            if (filteredModel.count > 0) {
-                                root.selectedIndex = (root.selectedIndex + 1) % filteredModel.count
-                                listView.currentIndex = root.selectedIndex
-                                listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                        // Navigation for GridView Mode
+                        if (root.gridMode) {
+                            if (event.key === Qt.Key_Right) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = (root.selectedIndex + 1) % filteredModel.count
+                                    gridView.currentIndex = root.selectedIndex
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Left) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = (root.selectedIndex - 1 + filteredModel.count) % filteredModel.count
+                                    gridView.currentIndex = root.selectedIndex
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Down) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = Math.min(filteredModel.count - 1, root.selectedIndex + itemGridColumns)
+                                    gridView.currentIndex = root.selectedIndex
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Up) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = Math.max(0, root.selectedIndex - itemGridColumns)
+                                    gridView.currentIndex = root.selectedIndex
+                                }
+                                event.accepted = true
                             }
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Up || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
-                            if (filteredModel.count > 0) {
-                                root.selectedIndex = (root.selectedIndex - 1 + filteredModel.count) % filteredModel.count
-                                listView.currentIndex = root.selectedIndex
-                                listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                        } 
+                        // Navigation for ListView Mode
+                        else {
+                            if (event.key === Qt.Key_Down || (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier))) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = (root.selectedIndex + 1) % filteredModel.count
+                                    listView.currentIndex = root.selectedIndex
+                                    listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                                }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Up || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                                if (filteredModel.count > 0) {
+                                    root.selectedIndex = (root.selectedIndex - 1 + filteredModel.count) % filteredModel.count
+                                    listView.currentIndex = root.selectedIndex
+                                    listView.positionViewAtIndex(listView.currentIndex, ListView.Contain)
+                                }
+                                event.accepted = true
                             }
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        }
+
+                        // Select Item
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                             if (filteredModel.count > 0 && root.selectedIndex >= 0 && root.selectedIndex < filteredModel.count) {
                                 root.itemSelected(filteredModel.get(root.selectedIndex))
                             }
@@ -185,6 +224,7 @@ PanelWindow {
                     ]
 
                     delegate: StyledRect {
+                        id: tabDelegate
                         property bool isCurrent: States.launcherMode === modelData.id
                         Layout.fillWidth: true
                         implicitHeight: 32
@@ -194,8 +234,8 @@ PanelWindow {
                         StyledText {
                             anchors.centerIn: parent
                             text: modelData.label
-                            color: isCurrent ? Colors.primaryContainerOn : Colors.surfaceVariantOn
-                            font.bold: isCurrent
+                            color: tabDelegate.isCurrent ? Colors.primaryContainerOn : Colors.surfaceVariantOn
+                            font.bold: tabDelegate.isCurrent
                             font.pixelSize: 12
                         }
 
@@ -210,9 +250,10 @@ PanelWindow {
                 }
             }
 
-            // Results List
+            // 1. Standard Results List (Apps, Clipboard, System)
             ListView {
                 id: listView
+                visible: !root.gridMode
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 model: filteredModel
@@ -221,12 +262,13 @@ PanelWindow {
                 spacing: 4
 
                 delegate: StyledRect {
+                    id: listDelegate
                     property bool isSelected: listView.currentIndex === index
 
                     width: listView.width
                     implicitHeight: 48
                     radius: 6
-                    color: isSelected ? Colors.primaryContainer : "transparent"
+                    color: listDelegate.isSelected ? Colors.primaryContainer : "transparent"
 
                     RowLayout {
                         anchors.fill: parent
@@ -238,7 +280,6 @@ PanelWindow {
                             Layout.preferredWidth: 32
                             Layout.preferredHeight: 32
 
-                            // Renders file-path image previews (e.g., file:///tmp/cliphist-previews/1.png)
                             Image {
                                 id: imgPreview
                                 anchors.fill: parent
@@ -250,19 +291,17 @@ PanelWindow {
                                 mipmap: true
                             }
 
-                            // Renders standard desktop application icons (e.g., "firefox")
                             IconImage {
                                 anchors.fill: parent
                                 visible: model.icon !== undefined && model.icon !== "" && !model.icon.startsWith("file://")
                                 source: visible ? model.icon : ""
                             }
 
-                            // Renders symbol fallback when no icon/preview path is provided
                             StyledSymbol {
                                 anchors.centerIn: parent
                                 iconSize: 20
                                 icon: (model.symbol !== undefined && model.symbol !== "") ? model.symbol : "application"
-                                color: isSelected ? Colors.primaryContainerOn : Colors.surfaceVariantOn
+                                color: listDelegate.isSelected ? Colors.primaryContainerOn : Colors.surfaceVariantOn
                                 visible: (model.icon === undefined || model.icon === "")
                             }
                         }
@@ -273,7 +312,7 @@ PanelWindow {
 
                             StyledText {
                                 text: model.name || ""
-                                color: isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
+                                color: listDelegate.isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
                                 font.bold: true
                                 font.pixelSize: 13
                                 elide: Text.ElideRight
@@ -282,7 +321,7 @@ PanelWindow {
 
                             StyledText {
                                 text: model.comment || model.exec || ""
-                                color: isSelected ? ColorUtils.applyAlpha(Colors.primaryContainerOn, 0.75) : Colors.surfaceVariantOn
+                                color: listDelegate.isSelected ? ColorUtils.applyAlpha(Colors.primaryContainerOn, 0.75) : Colors.surfaceVariantOn
                                 font.pixelSize: 11
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
@@ -296,6 +335,69 @@ PanelWindow {
                         hoverEnabled: true
                         onEntered: listView.currentIndex = index
                         onClicked: root.itemSelected(filteredModel.get(index))
+                    }
+                }
+            }
+
+            // 2. Wallpaper Grid View (Activated for Wallpaper Mode)
+            GridView {
+                id: gridView
+                visible: root.gridMode
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: filteredModel
+                currentIndex: root.selectedIndex
+                clip: true
+
+                cellWidth: Math.floor(width / root.itemGridColumns)
+                cellHeight: 130
+
+                delegate: Item {
+                    id: gridDelegate
+                    width: gridView.cellWidth
+                    height: gridView.cellHeight
+
+                    readonly property bool isSelected: gridView.currentIndex === index
+
+                    StyledRect {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        radius: 6
+                        color: gridDelegate.isSelected ? Colors.primaryContainer : Colors.surfaceContainerLow
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            spacing: 4
+
+                            Image {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                visible: model.icon !== undefined && model.icon !== ""
+                                source: visible ? model.icon : ""
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                cache: true
+                                mipmap: true
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: model.name || ""
+                                color: gridDelegate.isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
+                                font.pixelSize: 11
+                                font.bold: gridDelegate.isSelected
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideMiddle
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: gridView.currentIndex = index
+                            onClicked: root.itemSelected(filteredModel.get(index))
+                        }
                     }
                 }
             }
