@@ -42,5 +42,7 @@ Item {
 
     anchors.right: parent.right
     anchors.verticalCenter: parent.verticalCenter
+
+    NotificationModule {}
   }
 }

@@ -180,7 +180,7 @@ Item {
         active: States.currentActiveModule === "launcher"
         placeholderText: root.getPlaceholderText()
         sourceModel: root.getActiveModel()
-        gridMode: States.launcherMode === "wallpaper"
+        gridMode: States.launcherMode === "wallpaper" || States.launcherMode === "system"
 
         onCloseRequested: States.setActiveModule("")
 

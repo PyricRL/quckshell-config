@@ -284,7 +284,15 @@ PanelWindow {
                                 id: imgPreview
                                 anchors.fill: parent
                                 visible: model.icon !== undefined && model.icon !== "" && model.icon.startsWith("file://")
-                                source: visible ? model.icon : ""
+                                source: {
+                                  if (visible) {
+                                    if (model.icon) {
+                                      return model.icon
+                                    }
+                                    return ""
+                                  }
+                                  return ""
+                                }
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
                                 cache: true
@@ -370,16 +378,36 @@ PanelWindow {
                             anchors.margins: 4
                             spacing: 4
 
-                            Image {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                visible: model.icon !== undefined && model.icon !== ""
-                                source: visible ? model.icon : ""
-                                fillMode: Image.PreserveAspectCrop
-                                asynchronous: true
-                                cache: true
-                                mipmap: true
+                            Item {
+                              Layout.fillWidth: true
+                              Layout.fillHeight: true
+                              Image {
+                                  anchors.fill: parent
+                                  visible: model.icon !== undefined && model.icon !== ""
+                                  source: {
+                                    if (visible) {
+                                      if (model.icon) {
+                                        return model.icon
+                                      }
+                                      return ""
+                                    }
+                                    return ""
+                                  }
+                                  fillMode: Image.PreserveAspectCrop
+                                  asynchronous: true
+                                  cache: true
+                                  mipmap: true
+                              }
+
+                              StyledSymbol {
+                                anchors.centerIn: parent
+                                visible: (model.icon === undefined || model.icon === "") && (model.symbol !== undefined && model.symbol !== "")
+                                iconSize: 40
+                                icon: model.symbol || ""
+                                color: gridDelegate.isSelected ? Colors.primaryContainerOn : Colors.surfaceOn
+                              }
                             }
+
 
                             StyledText {
                                 Layout.fillWidth: true

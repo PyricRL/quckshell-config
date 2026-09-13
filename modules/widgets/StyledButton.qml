@@ -28,15 +28,28 @@ Control {
     signal toggled(bool checked)
 
     property color base_bg: {
-      switch (variant) {
-        case "primary":
-          return Colors.primary
-        case "secondary":
-          return Colors.secondary
-        case "background":
-          return Colors.background
-        default:
-          return Colors.secondary
+      if (checked) {
+        switch (variant) {
+          case "primary":
+            return Qt.darker(Colors.primary, 0.4)
+          case "secondary":
+            return Qt.darker(Colors.secondary, 0.4)
+          case "background":
+            return Qt.darker(Colors.background, 0.4)
+          default:
+            return Qt.darker(Colors.secondary, 0.4)
+        }
+      } else {
+        switch (variant) {
+          case "primary":
+            return Colors.primary
+          case "secondary":
+            return Colors.secondary
+          case "background":
+            return Colors.background
+          default:
+            return Colors.secondary
+        }
       }
     }
 

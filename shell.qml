@@ -3,10 +3,10 @@ import QtQuick
 
 import qs.modules.interface.bar
 import qs.modules.interface.launcher
+import qs.modules.interface.notification
 
 import qs.services
 
-import qs.modules.widgets
 
 Scope {
   id: shell
