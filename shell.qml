@@ -15,5 +15,7 @@ Scope {
 
   Launcher {}
 
+  Notification {}
+
   IPC {}
 }

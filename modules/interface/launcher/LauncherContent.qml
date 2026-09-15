@@ -136,7 +136,7 @@ Item {
         command: [
             "bash",
             "-c",
-            "find \"$HOME/.background-image\" -maxdepth 1 -type f " +
+            "find \"$HOME/Pictures/Wallpapers\" -maxdepth 1 -type f " +
             "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) " +
             "-printf '%f|%p\\n'"
         ]
