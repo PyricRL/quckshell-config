@@ -1,7 +1,7 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
-pragma Singleton
 
 Singleton {
     id: root
@@ -32,17 +32,17 @@ Singleton {
     property int volume: activePlayer ? Math.round(activePlayer.volume * 100) : 0
 
     function setVolume(vol) {
-      if (activePlayer && activePlayer.canControl && activePlayer.volumeSupported) {
-        activePlayer.volume = Math.max(0, Math.min(1, vol))
-      }
+        if (activePlayer && activePlayer.canControl && activePlayer.volumeSupported) {
+            activePlayer.volume = Math.max(0, Math.min(1, vol));
+        }
     }
 
     function increaseVolume(step) {
-      setVolume(activePlayer.volume + step)
+        setVolume(activePlayer.volume + step);
     }
 
     function decreaseVolume(step) {
-      setVolume(activePlayer.volume - step)
+        setVolume(activePlayer.volume - step);
     }
 
     function setPosition(pos) {
@@ -60,7 +60,7 @@ Singleton {
     function selectNextPlayer() {
         const players = Mpris.players.values;
         if (players.length <= 1)
-            return ;
+            return;
 
         const currentIndex = players.indexOf(activePlayer);
         const nextIndex = (currentIndex + 1) % players.length;
@@ -70,7 +70,7 @@ Singleton {
     function selectPreviousPlayer() {
         const players = Mpris.players.values;
         if (players.length <= 1)
-            return ;
+            return;
 
         const currentIndex = players.indexOf(activePlayer);
         const prevIndex = (currentIndex - 1 + players.length) % players.length;
@@ -80,12 +80,12 @@ Singleton {
     function updateActivePlayer() {
         const players = Mpris.players.values;
         if (manualSelection && instance.activePlayer && players.includes(instance.activePlayer))
-            return ;
+            return;
 
         if (manualSelection && instance.activePlayer && !players.includes(instance.activePlayer))
             manualSelection = false;
 
-        const playing = players.find((p) => {
+        const playing = players.find(p => {
             return p.playbackState === MprisPlaybackState.Playing;
         });
         if (playing) {
@@ -93,7 +93,6 @@ Singleton {
         } else if (players.length > 0) {
             if (!instance.activePlayer || !players.includes(instance.activePlayer))
                 instance.activePlayer = players[0];
-
         } else {
             instance.activePlayer = null;
         }
@@ -102,19 +101,16 @@ Singleton {
     function playPause() {
         if (activePlayer && activePlayer.canTogglePlaying)
             activePlayer.togglePlaying();
-
     }
 
     function next() {
         if (activePlayer && activePlayer.canGoNext)
             activePlayer.next();
-
     }
 
     function previous() {
         if (activePlayer && activePlayer.canGoPrevious)
             activePlayer.previous();
-
     }
 
     Component.onCompleted: updateActivePlayer()
@@ -134,7 +130,6 @@ Singleton {
             updateActivePlayer();
             if (activePlayer)
                 root.position = activePlayer.position;
-
         }
     }
 
@@ -146,5 +141,4 @@ Singleton {
 
         target: Mpris.players
     }
-
 }
