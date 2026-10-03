@@ -3,88 +3,76 @@ import Quickshell.Wayland
 import QtQuick
 
 import qs.services
-import qs.modules.widgets
-import qs.themes
 
 Scope {
-  id: root
+    id: root
 
-  PanelWindow {
-    id: window
+    PanelWindow {
+        id: window
 
-    implicitWidth: 550
-    visible: true
+        implicitWidth: 400
+        visible: Notif.popups.count > 0
+        color: "transparent"
 
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.exclusionMode: ExclusionMode.Normal
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.exclusionMode: ExclusionMode.Normal
 
-    color: "transparent"
-
-    anchors {
-      right: true
-      left: false
-      top: true
-      bottom: true
-    }
-
-    Item {
-      id: notificationList
-
-      anchors.left: parent.left
-      anchors.right: parent.right
-
-      Repeater {
-        id: rep
-
-        model: Notif.popups
-
-        NotificationChild {
-          width: notificationList.width - 80
-          anchors.horizontalCenter: notificationList.horizontalCenter
-
-          y: {
-            var pos = 0
-            for (let i = 0; i < index; i++) {
-              var prev = rep.itemAt(i);
-              if (prev) {
-                pos += prev.height + 3
-              }
-            }
-            return pos + 20;
-          }
-
-          Behavior on y {
-            NumberAnimation {
-              duration: 150
-              easing.type: Easing.InOutExpo
-            }
-          }
-
-          Component.onCompleted: {
-            if (!modelData.shown)
-              modelData.shown = true
-          }
-
-          rawNotif: modelData
-          title: modelData.summary
-          content: modelData.body
-          tracked: modelData.shown
-
-        }
-      }
-    }
-    mask: Region {
-      width: window.width
-      height: {
-        var total = 0;
-        for (let i = 0; i < rep.count; i++) {
-          var child = rep.itemAt(i);
-          if (child)
-            total += child.height + (i < rep.count - 1 ? 3 : 0)
+        anchors {
+            right: true
+            left: false
+            top: true
+            bottom: true
         }
 
-        return total;
-      }
+        ListView {
+            id: notificationList
+
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 40
+            height: contentHeight
+
+            spacing: 8
+            interactive: false
+            model: Notif.popups
+
+            add: Transition {
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: 250
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        property: "x"
+                        from: 100
+                        to: 0
+                        duration: 250
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            }
+
+            displaced: Transition {
+                NumberAnimation {
+                    properties: "y"
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            removeDisplaced: displaced
+
+            delegate: NotificationChild {
+                width: ListView.view.width
+            }
+        }
+
+        mask: Region {
+            item: notificationList
+        }
     }
-  }
 }

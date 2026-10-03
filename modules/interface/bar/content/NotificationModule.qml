@@ -25,6 +25,6 @@ Item {
     implicitHeight: 32
     implicitWidth: 32
 
-    onClicked: States.toggleModule("notification")
+    onClicked: States.toggleModule("rightmenu")
   }
 }
