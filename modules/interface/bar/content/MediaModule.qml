@@ -5,120 +5,117 @@ import qs.modules.widgets
 import qs.services
 
 Item {
-  id: mediaContainer
+    id: mediaContainer
 
-  Layout.alignment: Qt.AlignVCenter
+    Layout.alignment: Qt.AlignVCenter
 
-  implicitWidth: 266
-  implicitHeight: 32
+    implicitWidth: 266
+    implicitHeight: 32
 
-  MouseArea {
-    anchors.fill: parent
+    MouseArea {
+        anchors.fill: parent
 
-    onWheel: function(wheel) {
-      if (wheel.angleDelta.y > 0) {
-        Mpris.increaseVolume(0.05)
-      } else {
-        Mpris.decreaseVolume(0.05)
-      }
-      wheel.accepted = true
-    }
-  }
-
-  StyledGroup {
-    anchors.fill: parent
-    spacing: 8
-
-    Column {
-      id: infoColumn
-
-      Layout.fillHeight: true
-      Layout.fillWidth: true
-
-      spacing: -3
-
-      StyledText {
-        id: songItem
-        fontSize: 14
-        bold: true
-
-        text: Mpris.title
-        elide: Text.ElideRight
-        width: 200
-      }
-
-      StyledText {
-        id: artistItem
-        text: Mpris.artist
-        fontSize: 12
-        elide: Text.ElideRight
-        width: 200
-      }
+        onWheel: function (wheel) {
+            if (wheel.angleDelta.y > 0) {
+                Mpris.increaseVolume(0.05);
+            } else {
+                Mpris.decreaseVolume(0.05);
+            }
+            wheel.accepted = true;
+        }
     }
 
-    Row {
-      id: buttonColumn
+    StyledGroup {
+        anchors.fill: parent
+        spacing: 8
 
-      spacing: 4
-      Layout.alignment: Qt.AlignRight
+        Column {
+            id: infoColumn
 
-      Layout.preferredWidth: 86
+            Layout.fillHeight: true
+            Layout.fillWidth: true
 
-      StyledButton {
-        implicitWidth: 26
-        implicitHeight: 26
+            spacing: -3
 
-        iconSize: 16
-        iconOffsetX: -1
-        iconOffsetY: 1
+            StyledText {
+                id: songItem
+                fontSize: 14
+                bold: true
 
-        icon: ""
+                text: Mpris.title || "No Song Playing"
+                elide: Text.ElideRight
+                width: 200
+            }
 
-        variant: "background"
-        tint: 0.4
-
-        onClicked: {
-          Mpris.previous()
+            StyledText {
+                id: artistItem
+                text: Mpris.artist || "No Artist Available"
+                fontSize: 12
+                elide: Text.ElideRight
+                width: 200
+            }
         }
-      }
 
-      StyledButton {
-        implicitWidth: 26
-        implicitHeight: 26
+        Row {
+            id: buttonColumn
 
-        iconSize: 18
+            spacing: 4
+            Layout.alignment: Qt.AlignRight
 
-        variant: "background"
-        tint: 0.4
+            Layout.preferredWidth: 86
 
-        icon: Mpris.isPlaying ? "" : ""
-        iconOffsetX: Mpris.isPlaying ? 0 : 1
+            StyledButton {
+                implicitWidth: 26
+                implicitHeight: 26
 
-        onClicked: {
-          Mpris.playPause()
+                iconSize: 16
+                iconOffsetX: -1
+                iconOffsetY: 1
+
+                icon: ""
+
+                variant: "background"
+                tint: 0.4
+
+                onClicked: {
+                    Mpris.previous();
+                }
+            }
+
+            StyledButton {
+                implicitWidth: 26
+                implicitHeight: 26
+
+                iconSize: 18
+
+                variant: "background"
+                tint: 0.4
+
+                icon: Mpris.isPlaying ? "" : ""
+                iconOffsetX: Mpris.isPlaying ? 0 : 1
+
+                onClicked: {
+                    Mpris.playPause();
+                }
+            }
+
+            StyledButton {
+                implicitWidth: 26
+                implicitHeight: 26
+
+                iconSize: 16
+
+                variant: "background"
+                tint: 0.4
+
+                icon: ""
+                iconOffsetX: 1
+                iconOffsetY: 1
+
+                onClicked: {
+                    Mpris.next();
+                }
+            }
         }
-      }
-
-      StyledButton {
-        implicitWidth: 26
-        implicitHeight: 26
-
-        iconSize: 16
-
-        variant: "background"
-        tint: 0.4
-
-        icon: ""
-        iconOffsetX: 1
-        iconOffsetY: 1
-
-        onClicked: {
-          Mpris.next()
-        }
-      }
     }
-  }
-
-  
 }
-

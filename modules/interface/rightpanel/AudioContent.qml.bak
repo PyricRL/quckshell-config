@@ -1,0 +1,136 @@
+import Quickshell
+import Quickshell.Services.Pipewire
+
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls // Required for ScrollView
+
+import qs.modules.widgets
+import qs.themes
+
+Item {
+    id: root
+    anchors.fill: parent
+
+    property bool pipewireReady: Pipewire.ready
+    property var nodes: Pipewire.nodes
+    property var defaultSink: Pipewire.defaultAudioSink
+    property var defaultSource: Pipewire.defaultAudioSource
+
+    PwObjectTracker {
+        id: pwObjectTracker
+        objects: nodes
+    }
+
+    Component.onCompleted: {
+        if (pipewireReady) {
+            nodes = Pipewire.nodes;
+            defaultSink = Pipewire.defaultAudioSink;
+            defaultSource = Pipewire.defaultAudioSource;
+        }
+    }
+
+    Rectangle {
+        id: bgRect
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 200
+
+        color: Colors.surfaceContainerLow
+        radius: 6
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 100
+
+            StyledText {
+                id: titleText
+                text: "title"
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            StyledDropdown {
+              id: dropdown
+              onItemSelected: console.log("Selected: ", value)
+            }
+
+            ScrollView {
+                id: scrollView
+                anchors.fill: parent
+                clip: true // Prevents content from overflowing outside the rounded corners
+
+                ColumnLayout {
+                    id: layout
+                    width: scrollView.availableWidth // Ensure the layout respects the scroll view width
+                    spacing: 12
+
+                    // Top section: Default Sink & Source
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            StyledText {
+                                bold: true
+                                text: "Default Sink"
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                horizontalAlignment: Text.AlignRight
+                                text: defaultSink?.nickname || "None"
+                            }
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            StyledText {
+                                bold: true
+                                text: "Default Source"
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                horizontalAlignment: Text.AlignRight
+                                text: defaultSource?.nickname || "None"
+                            }
+                        }
+                    }
+
+                    // Bottom section: Available Nodes
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: "Available Nodes"
+                            font.pixelSize: 20
+                        }
+
+                        Repeater {
+                            model: nodes || []
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: modelData?.nickname || modelData?.name || "Unnamed node"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

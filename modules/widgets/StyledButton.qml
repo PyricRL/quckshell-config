@@ -28,70 +28,68 @@ Control {
     signal toggled(bool checked)
 
     property color base_bg: {
-      if (checked) {
-        switch (variant) {
-          case "primary":
-            return Qt.darker(Colors.primary, 0.4)
-          case "secondary":
-            return Qt.darker(Colors.secondary, 0.4)
-          case "background":
-            return Qt.darker(Colors.background, 0.4)
-          default:
-            return Qt.darker(Colors.secondary, 0.4)
+        if (checked) {
+            switch (variant) {
+            case "primary":
+                return Qt.darker(Colors.primary, 0.4);
+            case "secondary":
+                return Qt.darker(Colors.secondary, 0.4);
+            case "background":
+                return Qt.darker(Colors.background, 0.4);
+            default:
+                return Qt.darker(Colors.secondary, 0.4);
+            }
+        } else {
+            switch (variant) {
+            case "primary":
+                return Colors.primary;
+            case "secondary":
+                return Colors.secondary;
+            case "background":
+                return Colors.background;
+            default:
+                return Colors.secondary;
+            }
         }
-      } else {
-        switch (variant) {
-          case "primary":
-            return Colors.primary
-          case "secondary":
-            return Colors.secondary
-          case "background":
-            return Colors.background
-          default:
-            return Colors.secondary
-        }
-      }
     }
 
     property color base_fg: {
-      switch (variant) {
+        switch (variant) {
         case "primary":
-          return Colors.primaryOn
+            return Colors.primaryOn;
         case "secondary":
-          return Colors.secondaryOn
+            return Colors.secondaryOn;
         case "background":
-          return Colors.backgroundOn
+            return Colors.backgroundOn;
         default:
-          return Colors.secondaryOn
-      }
+            return Colors.secondaryOn;
+        }
     }
 
     property color tinted_bg: {
-      const amount = Math.abs(tint)
+        const amount = Math.abs(tint);
 
-      if (tint < 0)
-        return Qt.darker(base_bg, 1.0 + amount)
+        if (tint < 0)
+            return Qt.darker(base_bg, 1.0 + amount);
 
-      if (tint > 0)
-        return Qt.lighter(base_bg, 1.0 + amount)
+        if (tint > 0)
+            return Qt.lighter(base_bg, 1.0 + amount);
 
-      return base_bg
+        return base_bg;
     }
-
 
     property color background_color: {
         if (!root.enabled)
-            return ColorUtils.transparentize(tinted_bg, 0.4)
+            return ColorUtils.transparentize(tinted_bg, 0.4);
 
         if (mouse_area.pressed)
-            return Qt.darker(tinted_bg, 1.2)
+            return Qt.darker(tinted_bg, 1.2);
 
         if (mouse_area.containsMouse)
-            return Qt.lighter(tinted_bg, 1.1)
+            return Qt.lighter(tinted_bg, 1.1);
 
-        return tinted_bg
+        return tinted_bg;
     }
-    
 
     property color disabled_bg: ColorUtils.transparentize(tinted_bg, 0.4)
     property color disabled_fg: ColorUtils.transparentize(base_fg, 0.4)
@@ -100,13 +98,13 @@ Control {
 
     property color text_color: !root.enabled ? disabled_fg : base_fg
 
-    implicitWidth: (label.text === "" && icon !== "")
-        ? implicitHeight
-        : row.implicitWidth + implicitHeight
+    implicitWidth: (label.text === "" && icon !== "") ? implicitHeight : row.implicitWidth + implicitHeight
     implicitHeight: 40
 
     contentItem: Item {
         anchors.fill: parent
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
         Row {
             id: row
             anchors.centerIn: parent
@@ -126,7 +124,6 @@ Control {
                 id: label
                 font.pixelSize: root.fontSize
                 color: root.text_color
-                anchors.verticalCenter: parent.verticalCenter
                 elide: Text.ElideRight
             }
         }
@@ -144,12 +141,13 @@ Control {
         hoverEnabled: root.enabled
         cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ForbiddenCursor
         onClicked: {
-            if (!root.enabled) return
+            if (!root.enabled)
+                return;
             if (root.checkable) {
-                root.checked = !root.checked
-                root.toggled(root.checked)
+                root.checked = !root.checked;
+                root.toggled(root.checked);
             }
-            root.clicked()
+            root.clicked();
         }
     }
 }
