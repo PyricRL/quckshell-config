@@ -11,7 +11,8 @@ import qs.themes
 Item {
     id: root
 
-    anchors.fill: parent
+    Layout.fillWidth: true
+    implicitHeight: bgRect.height
 
     property bool pipewireReady: Pipewire.ready
     property var nodes: Pipewire.nodes
@@ -103,14 +104,16 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        height: 180
+        height: colLayout.height + 24
 
         color: Colors.surfaceContainerLow
         radius: 6
 
         ColumnLayout {
             id: colLayout
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             anchors.margins: 12
             spacing: 12
 
@@ -169,6 +172,31 @@ Item {
                     initialIndex: root.defaultSourceIndex
                     onItemSelected: value => {
                         Pipewire.preferredDefaultAudioSource = value;
+                    }
+                }
+            }
+
+            StyledSlider {
+                id: micSlider
+
+                startValue: 0
+                endValue: 125   // Represents 0% to 125%
+
+                PwObjectTracker {
+                    objects: [Pipewire.defaultAudioSource]
+                }
+
+                readonly property var source: Pipewire.defaultAudioSource?.audio
+
+                enabled: Pipewire.ready && source !== null
+
+                // Scale Pipewire's 0.0 - 1.25 range up to 0 - 125 for the slider
+                value: source ? source.volume * 100 : 0.0
+
+                onMoved: {
+                    if (source) {
+                        // Scale the slider's 0 - 125 value back down to Pipewire's 0.0 - 1.25 range
+                        source.volume = value / 100;
                     }
                 }
             }

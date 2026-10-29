@@ -14,17 +14,22 @@ StyledRect {
 
     ColumnLayout {
         id: layout
-        anchors.fill: parent
+        width: parent.width
+        height: deviceAudio.height + appAudio.height
 
         anchors.margins: 10
         spacing: 10
 
-        AudioContent {}
+        DeviceAudioContent {
+            id: deviceAudio
+            Layout.fillWidth: true
+            Layout.preferredHeight: implicitHeight
+        }
 
-        Rectangle {
-            Text {
-                text: "hi"
-            }
+        AppAudioContent {
+            id: appAudio
+            Layout.fillWidth: true
+            Layout.preferredHeight: implicitHeight
         }
     }
 }
